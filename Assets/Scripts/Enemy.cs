@@ -16,6 +16,8 @@ public class Enemy : MonoBehaviour
     private bool right;
     private bool attack;
 
+    private GameObject sceneController;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -33,11 +35,18 @@ public class Enemy : MonoBehaviour
         velocity = new Vector2();
         rigidBody = GetComponent<Rigidbody2D>();
         triggerBox = GetComponentInChildren<BoxCollider2D>();
+
+        sceneController = GameObject.Find("SceneController");
     }
 
     // Update is called once per frame
     void Update()
-    {        
+    {
+        if (sceneController.GetComponent<SceneManagement>().paused)
+        {
+            return;
+        }
+
         MoveBackAndForth();
 
         rigidBody.position += velocity * Time.deltaTime;

@@ -22,6 +22,7 @@ public class Player : MonoBehaviour
 
     private PlayerAnim anim;
 
+    private GameObject sceneController;
 
     // Start is called before the first frame update
     void Start()
@@ -38,11 +39,18 @@ public class Player : MonoBehaviour
         rigidBody = transform.GetComponent<Rigidbody2D>();
         playerCollider = transform.GetComponent<BoxCollider2D>();
         anim = transform.GetComponent<PlayerAnim>();
+
+        sceneController = GameObject.Find("SceneController");
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (sceneController.GetComponent<SceneManagement>().paused)
+        {
+            return;
+        }
+
         Jump();
         Dash();
         Move();
