@@ -5,6 +5,7 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     private Rigidbody2D rigidBody;
+    private SpriteRenderer spriteRender;
     private Vector2 velocity;
 
     public float loc1;
@@ -37,6 +38,7 @@ public class Enemy : MonoBehaviour
         attack = false;
         velocity = new Vector2();
         rigidBody = GetComponent<Rigidbody2D>();
+        spriteRender = GetComponent<SpriteRenderer>();
 
         sceneController = GameObject.Find("SceneController");
 
@@ -87,7 +89,7 @@ public class Enemy : MonoBehaviour
     {
         if (attack && player.Attacking)
         {
-            GetComponent<SpriteRenderer>().color = Color.red;
+            spriteRender.color = Color.red;
             dead = true;
         }
     }
