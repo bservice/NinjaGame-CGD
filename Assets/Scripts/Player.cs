@@ -20,9 +20,17 @@ public class Player : MonoBehaviour
 
     private bool stopFriction;
 
+    private bool attacking;
+    private float timeLeft;
+
     private PlayerAnim anim;
 
     private GameObject sceneController;
+
+    public bool Attacking
+    {
+        get { return attacking; }
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -35,6 +43,9 @@ public class Player : MonoBehaviour
         movementLevel = 1;
 
         stopFriction = false;
+
+        attacking = false;
+        timeLeft = 0.2f;
 
         rigidBody = transform.GetComponent<Rigidbody2D>();
         playerCollider = transform.GetComponent<BoxCollider2D>();
@@ -50,10 +61,11 @@ public class Player : MonoBehaviour
         {
             return;
         }
-
+        
         Jump();
         Dash();
         Move();
+        Attack();
         anim.AnimUpdate(rigidBody.velocity.x, rigidBody.velocity.y, Grounded());
     }
 
@@ -126,7 +138,7 @@ public class Player : MonoBehaviour
 
             stopFriction = false;
 
-            rigidBody.gravityScale = 0.0f;
+            rigidBody.gravityScale = 0.0f;            
         }
     }
 
@@ -135,5 +147,23 @@ public class Player : MonoBehaviour
         RaycastHit2D raycast = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0.0f, Vector2.down, 0.1f,  platforms);
 
         return raycast.collider != null;
+    }
+
+    private void Attack()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            attacking = true;
+        }
+
+        if (attacking)
+        {
+            timeLeft -= Time.deltaTime;
+            if (timeLeft <= 0)
+            {
+                attacking = false;
+                timeLeft = 0.2f;
+            }
+        }
     }
 }

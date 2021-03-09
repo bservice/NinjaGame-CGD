@@ -5,7 +5,6 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     private Rigidbody2D rigidBody;
-    private BoxCollider2D triggerBox;
     private Vector2 velocity;
 
     public float loc1;
@@ -15,8 +14,11 @@ public class Enemy : MonoBehaviour
     private bool left;
     private bool right;
     private bool attack;
+    private bool dead;
 
     private GameObject sceneController;
+
+    private Player player;
 
     // Start is called before the first frame update
     void Start()
@@ -31,12 +33,14 @@ public class Enemy : MonoBehaviour
             left = true;
             right = false;
         }
+        dead = false;
         attack = false;
         velocity = new Vector2();
         rigidBody = GetComponent<Rigidbody2D>();
-        triggerBox = GetComponentInChildren<BoxCollider2D>();
 
         sceneController = GameObject.Find("SceneController");
+
+        player = FindObjectOfType<Player>();
     }
 
     // Update is called once per frame
@@ -47,7 +51,11 @@ public class Enemy : MonoBehaviour
             return;
         }
 
-        MoveBackAndForth();
+        CheckForKill();
+        if (!dead)
+        {
+            MoveBackAndForth();
+        }
 
         rigidBody.position += velocity * Time.deltaTime;
         velocity = Vector2.zero;
@@ -75,12 +83,20 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    private void CheckForKill()
+    {
+        if (attack && player.Attacking)
+        {
+            GetComponent<SpriteRenderer>().color = Color.red;
+            dead = true;
+        }
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if(collision.tag == "Player")
         {
             attack = true;
-            Debug.Log("attack now");
         }
     }
 
@@ -89,7 +105,6 @@ public class Enemy : MonoBehaviour
         if (collision.tag == "Player")
         {
             attack = false;
-            Debug.Log("can't attack");
         }
     }
 }
