@@ -8,8 +8,8 @@ public class Enemy : MonoBehaviour
     private SpriteRenderer spriteRender;
     private Vector2 velocity;
 
-    public float loc1;
-    public float loc2;
+    public float rightPos;
+    public float leftPos;
     public float speed;
 
     private bool left;
@@ -24,8 +24,8 @@ public class Enemy : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if(Random.Range(0, 1) == 1)
-        { 
+        if(Random.Range(0, 2) == 1)
+        {
             right = true;
             left = false;
         }
@@ -53,7 +53,10 @@ public class Enemy : MonoBehaviour
             return;
         }
 
+        //Check to see if the enemy is being killed
         CheckForKill();
+
+        //If enemy is alive, move it back and forth
         if (!dead)
         {
             MoveBackAndForth();
@@ -67,7 +70,7 @@ public class Enemy : MonoBehaviour
     {
         if (right)
         {
-            if (rigidBody.position.x >= loc1)
+            if (rigidBody.position.x >= rightPos)
             {
                 right = !right;
                 left = !left;
@@ -76,7 +79,7 @@ public class Enemy : MonoBehaviour
         }
         if (left)
         {
-            if (rigidBody.position.x <= loc2)
+            if (rigidBody.position.x <= leftPos)
             {
                 right = !right;
                 left = !left;
@@ -87,6 +90,8 @@ public class Enemy : MonoBehaviour
 
     private void CheckForKill()
     {
+        //Is the enemy eligible to be attacked and is the player in an attacking state?
+        //*****Can add more requirements for destroy like a speed threshhold here
         if (attack && player.Attacking)
         {
             spriteRender.color = Color.red;
@@ -96,6 +101,7 @@ public class Enemy : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        //Mark enemy as eligible to be killed only if the player is within the kill bounds
         if(collision.tag == "Player")
         {
             attack = true;

@@ -6,6 +6,7 @@ public class Wall : MonoBehaviour
 {
     private Player player;
 
+    //Bool that tests if wall is eligible to be attacked
     private bool attack;
 
     // Start is called before the first frame update
@@ -22,6 +23,8 @@ public class Wall : MonoBehaviour
 
     private void CheckForDestroy()
     {
+        //Is the wall eligible to be attacked and is the player in an attacking state?
+        //*****Can add more requirements for destroy like a speed threshhold here
         if (attack && player.Attacking)
         {
             Destroy(this);
@@ -31,6 +34,7 @@ public class Wall : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        //Mark wall as eligible to be destroyed only if the player is within the kill bounds
         if (collision.tag == "Player")
         {
             attack = true;
