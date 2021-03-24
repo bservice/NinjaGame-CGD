@@ -96,6 +96,12 @@ public class Enemy : MonoBehaviour
         {
             spriteRender.color = Color.red;
             dead = true;
+            if (player.movementLevel < 4)
+            {
+                player.movementLevel += 1;
+            }
+            Destroy(this);
+            Destroy(this.gameObject);
         }
     }
 

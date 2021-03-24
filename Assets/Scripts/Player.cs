@@ -38,9 +38,9 @@ public class Player : MonoBehaviour
         movementSpeed = new float[] { 4.5f, 5.25f, 5.75f, 6.25f, 6.5f };
         friction = 0.98f;
         jumpValue = 6.0f;
-        dashDistance = 0.5f;
+        dashDistance = 1.0f;
 
-        movementLevel = 1;
+        movementLevel = 0;
 
         stopFriction = false;
 
@@ -105,7 +105,11 @@ public class Player : MonoBehaviour
     private void Dash()
     {
         Vector2 playerPosition = rigidBody.transform.position;
-        float distance = Vector2.Distance(positionDashedFrom, playerPosition);
+        Vector2 normalizedDist = playerPosition + positionDashedFrom;
+        normalizedDist.Normalize();
+
+        float distance = Vector2.Distance(playerPosition, playerPosition + (normalizedDist * dashDistance));
+        //float distance = Vector2.Distance(positionDashedFrom, playerPosition);
 
         if (distance > (dashDistance * movementLevel) && !stopFriction)
         {
@@ -129,8 +133,8 @@ public class Player : MonoBehaviour
 
             normalizedVector.Normalize();
 
-            float movementX = normalizedVector.x * movementSpeed[movementLevel] * 2;
-            float movementY = normalizedVector.y * movementSpeed[movementLevel] * 2;
+            float movementX = normalizedVector.x * movementSpeed[movementLevel] * 6;
+            float movementY = normalizedVector.y * movementSpeed[movementLevel] * 6;
 
             rigidBody.velocity = new Vector2(movementX, movementY);
 

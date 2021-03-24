@@ -25,8 +25,9 @@ public class Wall : MonoBehaviour
     {
         //Is the wall eligible to be attacked and is the player in an attacking state?
         //*****Can add more requirements for destroy like a speed threshhold here
-        if (attack && player.Attacking)
+        if (attack && player.Attacking && player.movementLevel == 4)
         {
+            player.movementLevel = 0;
             Destroy(this);
             Destroy(gameObject);
         }
