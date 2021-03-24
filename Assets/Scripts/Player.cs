@@ -61,12 +61,14 @@ public class Player : MonoBehaviour
         {
             return;
         }
-        
+        Vector3 newCamPos = new Vector3(rigidBody.transform.position.x, rigidBody.transform.position.y, -10);
+        Camera.main.transform.position = newCamPos;
         Jump();
         Dash();
         Move();
         Attack();
         anim.AnimUpdate(rigidBody.velocity.x, rigidBody.velocity.y, Grounded());
+        Debug.Log(rigidBody.velocity);
     }
 
     private void Jump()
