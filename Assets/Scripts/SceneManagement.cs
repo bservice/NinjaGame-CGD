@@ -10,9 +10,11 @@ public class SceneManagement : MonoBehaviour
     public enum GameState { MainMenuScene, GameScene, GameOverScene };
     public GameState currentState;
     public bool paused = false;
-    public GameObject pauseUI;
-    public GameObject gameUI;
-    public GameObject scoreText;
+    private GameObject pauseUI;
+    private GameObject gameUI;
+    private Text scoreText;
+    private Text timerText;
+    public float timePassed;
     public int score;
 
     // Start is called before the first frame update
@@ -23,11 +25,13 @@ public class SceneManagement : MonoBehaviour
 
         paused = false;
         score = 0;
+        timePassed = 0;
 
         if(currentState == GameState.GameScene)
         {
             gameUI = GameObject.Find("GameUI");
-            scoreText = GameObject.Find("ScoreNumberText");
+            scoreText = GameObject.Find("ScoreNumberText").GetComponent<Text>();
+            timerText = GameObject.Find("TimerNumberText").GetComponent<Text>();
             pauseUI = GameObject.Find("PauseScreenUI");
             pauseUI.SetActive(false);
         }
@@ -51,7 +55,22 @@ public class SceneManagement : MonoBehaviour
                 }
 
                 // update the score UI
-                scoreText.GetComponent<Text>().text = score.ToString();
+                scoreText.text = score.ToString();
+
+                // track the time it takes for the player to complete the level
+                if (!paused)
+                {
+                    timePassed += Time.deltaTime;
+
+                    if (timePassed < 60)
+                    {
+                        timerText.text = Math.Truncate(timePassed % 60).ToString();
+                    }
+                    else
+                    {
+                        timerText.text = Math.Truncate(timePassed / 60).ToString() + ":" + Math.Truncate(timePassed % 60).ToString("00");
+                    }
+                }
 
                 break;
             case GameState.GameOverScene:
