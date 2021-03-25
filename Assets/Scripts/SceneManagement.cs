@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using System;
 
 public class SceneManagement : MonoBehaviour
@@ -10,6 +11,9 @@ public class SceneManagement : MonoBehaviour
     public GameState currentState;
     public bool paused = false;
     public GameObject pauseUI;
+    public GameObject gameUI;
+    public GameObject scoreText;
+    public int score;
 
     // Start is called before the first frame update
     void Start()
@@ -18,9 +22,12 @@ public class SceneManagement : MonoBehaviour
         Enum.TryParse(SceneManager.GetActiveScene().name, out currentState);
 
         paused = false;
+        score = 0;
 
         if(currentState == GameState.GameScene)
         {
+            gameUI = GameObject.Find("GameUI");
+            scoreText = GameObject.Find("ScoreNumberText");
             pauseUI = GameObject.Find("PauseScreenUI");
             pauseUI.SetActive(false);
         }
@@ -37,10 +44,15 @@ public class SceneManagement : MonoBehaviour
 
                 break;
             case GameState.GameScene:
+                // pause when the player presses the ESCAPE key
                 if (Input.GetKeyUp(KeyCode.Escape))
                 {
                     TogglePause();
                 }
+
+                // update the score UI
+                scoreText.GetComponent<Text>().text = score.ToString();
+
                 break;
             case GameState.GameOverScene:
 
@@ -78,6 +90,7 @@ public class SceneManagement : MonoBehaviour
     {
         paused = !paused;
         pauseUI.SetActive(paused);
+        gameUI.SetActive(!gameUI.activeSelf);
     }
 
     // Closes the game

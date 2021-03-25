@@ -100,6 +100,7 @@ public class Enemy : MonoBehaviour
             {
                 player.movementLevel += 1;
             }
+            sceneController.GetComponent<SceneManagement>().score += 100;
             Destroy(this);
             Destroy(this.gameObject);
         }

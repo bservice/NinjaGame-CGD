@@ -5,6 +5,7 @@ using UnityEngine;
 public class Wall : MonoBehaviour
 {
     private Player player;
+    private GameObject sceneController;
 
     //Bool that tests if wall is eligible to be attacked
     private bool attack;
@@ -13,6 +14,7 @@ public class Wall : MonoBehaviour
     void Start()
     {
         player = FindObjectOfType<Player>();
+        sceneController = GameObject.Find("SceneController");
     }
 
     // Update is called once per frame
@@ -28,6 +30,7 @@ public class Wall : MonoBehaviour
         if (attack && player.Attacking && player.movementLevel == 4)
         {
             player.movementLevel = 0;
+            sceneController.GetComponent<SceneManagement>().score += 10;
             Destroy(this);
             Destroy(gameObject);
         }
