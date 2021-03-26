@@ -49,7 +49,7 @@ public class Player : MonoBehaviour
 
         rigidBody = transform.GetComponent<Rigidbody2D>();
         playerCollider = transform.GetComponent<BoxCollider2D>();
-        anim = transform.GetComponent<PlayerAnim>();
+        anim = transform.GetComponentInChildren<PlayerAnim>();
 
         sceneController = GameObject.Find("SceneController");
     }
@@ -67,7 +67,7 @@ public class Player : MonoBehaviour
         Dash();
         Move();
         Attack();
-        anim.AnimUpdate(rigidBody.velocity.x, rigidBody.velocity.y, Grounded());
+        anim.AnimUpdate(rigidBody.velocity.x, rigidBody.velocity.y, Grounded(), attacking);
         Debug.Log(rigidBody.velocity);
     }
 
@@ -144,7 +144,7 @@ public class Player : MonoBehaviour
 
             stopFriction = false;
 
-            rigidBody.gravityScale = 0.0f;            
+            rigidBody.gravityScale = 0.0f;    
         }
     }
 

@@ -21,6 +21,8 @@ public class Enemy : MonoBehaviour
 
     private Player player;
 
+    private EnemyAnim anim;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -43,6 +45,8 @@ public class Enemy : MonoBehaviour
         sceneController = GameObject.Find("SceneController");
 
         player = FindObjectOfType<Player>();
+
+        anim = GetComponentInChildren<EnemyAnim>();
     }
 
     // Update is called once per frame
@@ -62,7 +66,11 @@ public class Enemy : MonoBehaviour
             MoveBackAndForth();
         }
 
+
         rigidBody.position += velocity * Time.deltaTime;
+
+        anim.AnimUpdate(velocity.x);
+
         velocity = Vector2.zero;
     }
 
