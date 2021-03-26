@@ -21,6 +21,7 @@ public class Player : MonoBehaviour
     public int movementLevel;
 
     private bool stopFriction;
+    public bool killedAnEnemy;
 
     private bool attacking;
     private float timeLeft;
@@ -44,7 +45,7 @@ public class Player : MonoBehaviour
         dashCooldown = 1.0f;
         deltaTime = 0.0f;
 
-        movementLevel = 1;
+        movementLevel = 0;
 
         stopFriction = false;
 
@@ -69,20 +70,13 @@ public class Player : MonoBehaviour
         }
 
         Jump();
-
-        if (dashCooldown < deltaTime)
-        {
-            Dash();
-        }
+        Dash();
         Move();
         Attack();
-<<<<<<< Updated upstream
-        anim.AnimUpdate(rigidBody.velocity.x, rigidBody.velocity.y, Grounded(), attacking);
-        Debug.Log(rigidBody.velocity);
-=======
-        anim.AnimUpdate(rigidBody.velocity.x, rigidBody.velocity.y, Grounded());
 
->>>>>>> Stashed changes
+        Camera.main.transform.position = new Vector3(rigidBody.transform.position.x, rigidBody.transform.position.y, -10.0f);
+
+        anim.AnimUpdate(rigidBody.velocity.x, rigidBody.velocity.y, Grounded(), attacking);
     }
 
     private void Jump()
@@ -124,17 +118,17 @@ public class Player : MonoBehaviour
         Vector2 normalizedDist = playerPosition + positionDashedFrom;
         normalizedDist.Normalize();
 
-        float distance = Vector2.Distance(playerPosition, playerPosition + (normalizedDist * dashDistance));
+        float distance = Vector2.Distance(playerPosition, playerPosition + (normalizedDist * (dashDistance * (movementLevel + 1))));
 
         if(HitWall())
         {
+
             distance = dashDistance * movementLevel;
+            rigidBody.gravityScale = 1.0f;
         }
 
-        if (distance >= (dashDistance * movementLevel) && !stopFriction)
+        if (distance >= (dashDistance * (movementLevel + 1)) && !stopFriction)
         {
-            Debug.Log(dashDistance + "     " + distance);
-
             rigidBody.gravityScale = 1.0f;
 
             rigidBody.velocity = new Vector2(rigidBody.velocity.x * friction, rigidBody.velocity.y);
@@ -144,31 +138,38 @@ public class Player : MonoBehaviour
                 stopFriction = true;
                 rigidBody.velocity = new Vector2(0, rigidBody.velocity.y);
             }
+
+            if (killedAnEnemy)
+            {
+                Debug.Log("killed");
+
+                killedAnEnemy = false;
+                movementLevel++;
+            }
         }
 
-        if (Input.GetMouseButtonDown(0))
+        if (dashCooldown < deltaTime)
         {
-            deltaTime = 0.0f;
+            if (Input.GetMouseButtonDown(0))
+            {
+                deltaTime = 0.0f;
 
-            Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector2 normalizedVector = mousePosition - playerPosition;
+                Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                Vector2 normalizedVector = mousePosition - playerPosition;
 
-            normalizedVector.Normalize();
+                normalizedVector.Normalize();
 
-            float movementX = normalizedVector.x * movementSpeed[movementLevel] * 2;
-            float movementY = normalizedVector.y * movementSpeed[movementLevel] * 2;
+                float movementX = normalizedVector.x * movementSpeed[movementLevel] * 4;
+                float movementY = normalizedVector.y * movementSpeed[movementLevel] * 4;
 
-            rigidBody.velocity = new Vector2(movementX, movementY);
+                rigidBody.velocity = new Vector2(movementX, movementY);
 
-            positionDashedFrom = playerPosition;
+                positionDashedFrom = playerPosition;
 
-            stopFriction = false;
+                stopFriction = false;
 
-<<<<<<< Updated upstream
-            rigidBody.gravityScale = 0.0f;    
-=======
-            rigidBody.gravityScale = 0.0f;
->>>>>>> Stashed changes
+                rigidBody.gravityScale = 0.0f;
+            }
         }
     }
 

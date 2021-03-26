@@ -106,7 +106,7 @@ public class Enemy : MonoBehaviour
             dead = true;
             if (player.movementLevel < 4)
             {
-                player.movementLevel += 1;
+                player.killedAnEnemy = true;
             }
             sceneController.GetComponent<SceneManagement>().score += 100;
             Destroy(this);
