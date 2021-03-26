@@ -15,6 +15,8 @@ public class Player : MonoBehaviour
     private float[] movementSpeed;
     private float friction;
     private float dashDistance;
+    private float dashCooldown;
+    private float deltaTime;
 
     public int movementLevel;
 
@@ -38,9 +40,11 @@ public class Player : MonoBehaviour
         movementSpeed = new float[] { 4.5f, 5.25f, 5.75f, 6.25f, 6.5f };
         friction = 0.98f;
         jumpValue = 6.0f;
-        dashDistance = 1.0f;
+        dashDistance = 0.5f;
+        dashCooldown = 1.0f;
+        deltaTime = 0.0f;
 
-        movementLevel = 0;
+        movementLevel = 1;
 
         stopFriction = false;
 
@@ -57,18 +61,28 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        deltaTime += Time.deltaTime;
+
         if (sceneController.GetComponent<SceneManagement>().paused)
         {
             return;
         }
-        Vector3 newCamPos = new Vector3(rigidBody.transform.position.x, rigidBody.transform.position.y, -10);
-        Camera.main.transform.position = newCamPos;
+
         Jump();
-        Dash();
+
+        if (dashCooldown < deltaTime)
+        {
+            Dash();
+        }
         Move();
         Attack();
+<<<<<<< Updated upstream
         anim.AnimUpdate(rigidBody.velocity.x, rigidBody.velocity.y, Grounded(), attacking);
         Debug.Log(rigidBody.velocity);
+=======
+        anim.AnimUpdate(rigidBody.velocity.x, rigidBody.velocity.y, Grounded());
+
+>>>>>>> Stashed changes
     }
 
     private void Jump()
@@ -94,14 +108,14 @@ public class Player : MonoBehaviour
             if (Grounded())
             {
 
-               rigidBody.velocity = new Vector2(rigidBody.velocity.x * friction, rigidBody.velocity.y);
+                rigidBody.velocity = new Vector2(rigidBody.velocity.x * friction, rigidBody.velocity.y);
 
                 if (rigidBody.velocity.x < 0.00001f && rigidBody.velocity.x > -0.00001f)
                 {
                     rigidBody.velocity = new Vector2(0, rigidBody.velocity.y);
                 }
             }
-        }    
+        }
     }
 
     private void Dash()
@@ -111,9 +125,13 @@ public class Player : MonoBehaviour
         normalizedDist.Normalize();
 
         float distance = Vector2.Distance(playerPosition, playerPosition + (normalizedDist * dashDistance));
-        //float distance = Vector2.Distance(positionDashedFrom, playerPosition);
 
-        if (distance > (dashDistance * movementLevel) && !stopFriction)
+        if(HitWall())
+        {
+            distance = dashDistance * movementLevel;
+        }
+
+        if (distance >= (dashDistance * movementLevel) && !stopFriction)
         {
             Debug.Log(dashDistance + "     " + distance);
 
@@ -130,13 +148,15 @@ public class Player : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
+            deltaTime = 0.0f;
+
             Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector2 normalizedVector = mousePosition - playerPosition;
 
             normalizedVector.Normalize();
 
-            float movementX = normalizedVector.x * movementSpeed[movementLevel] * 6;
-            float movementY = normalizedVector.y * movementSpeed[movementLevel] * 6;
+            float movementX = normalizedVector.x * movementSpeed[movementLevel] * 2;
+            float movementY = normalizedVector.y * movementSpeed[movementLevel] * 2;
 
             rigidBody.velocity = new Vector2(movementX, movementY);
 
@@ -144,15 +164,41 @@ public class Player : MonoBehaviour
 
             stopFriction = false;
 
+<<<<<<< Updated upstream
             rigidBody.gravityScale = 0.0f;    
+=======
+            rigidBody.gravityScale = 0.0f;
+>>>>>>> Stashed changes
         }
     }
 
     private bool Grounded()
     {
-        RaycastHit2D raycast = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0.0f, Vector2.down, 0.1f,  platforms);
+        RaycastHit2D raycast = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0.0f, Vector2.down, 0.1f, platforms);
 
         return raycast.collider != null;
+    }
+
+    private bool HitWall()
+    {
+        RaycastHit2D raycast;
+
+        raycast = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0.0f, Vector2.up, 0.1f, platforms);
+
+        if (raycast.collider != null)
+            return raycast.collider != null;
+
+        raycast = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0.0f, Vector2.left, 0.1f, platforms);
+
+        if (raycast.collider != null)
+            return raycast.collider != null;
+
+        raycast = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0.0f, Vector2.right, 0.1f, platforms);
+
+        if (raycast.collider != null)
+            return raycast.collider != null;
+
+        return false;
     }
 
     private void Attack()
