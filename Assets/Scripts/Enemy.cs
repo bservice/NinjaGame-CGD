@@ -17,11 +17,19 @@ public class Enemy : MonoBehaviour
     private bool attack;
     private bool dead;
 
+    //Booleans to turn off and on auto shoot and how long they should shoot for
+    public bool autoShoot;
+    public float shootTime;
+    private float firstShootTime;
+
     private GameObject sceneController;
 
     private Player player;
 
     private EnemyAnim anim;
+
+    public Bullet bulletPrefab;
+    private Bullet bullet;
 
     // Start is called before the first frame update
     void Start()
@@ -41,6 +49,8 @@ public class Enemy : MonoBehaviour
         velocity = new Vector2();
         rigidBody = GetComponent<Rigidbody2D>();
         spriteRender = GetComponent<SpriteRenderer>();
+
+        firstShootTime = shootTime;
 
         sceneController = GameObject.Find("SceneController");
 
@@ -66,6 +76,16 @@ public class Enemy : MonoBehaviour
             MoveBackAndForth();
         }
 
+        //Only allow auto shooting if it is turned on
+        if (autoShoot)
+        {
+            shootTime -= Time.deltaTime;
+            if (shootTime <= 0.0f)
+            {
+                Shoot();
+                shootTime = firstShootTime;
+            }
+        }
 
         rigidBody.position += velocity * Time.deltaTime;
 
@@ -81,7 +101,7 @@ public class Enemy : MonoBehaviour
             if (rigidBody.position.x >= rightPos)
             {
                 right = !right;
-                left = !left;
+                left = !left;                
             }
             velocity = new Vector2(1, 0) * speed;
         }
@@ -90,7 +110,7 @@ public class Enemy : MonoBehaviour
             if (rigidBody.position.x <= leftPos)
             {
                 right = !right;
-                left = !left;
+                left = !left;                
             }
             velocity = new Vector2(-1, 0) * speed;
         }
@@ -111,6 +131,26 @@ public class Enemy : MonoBehaviour
             sceneController.GetComponent<SceneManagement>().score += 100;
             Destroy(this);
             Destroy(this.gameObject);
+        }
+    }
+
+    //Method to create and shoot bullets
+    private void Shoot()
+    {
+        bullet = Instantiate(bulletPrefab, new Vector2(transform.position.x, transform.position.y), Quaternion.identity);
+        if (bullet != null)
+        {
+            
+            if (right)
+            {
+                bullet.Direction = new Vector2(1.0f, 0.0f);
+            }
+            if (left)
+            {
+                bullet.Direction = new Vector2(-1.0f, 0.0f);
+            }
+            bullet.Position = transform.position;
+            bullet.Y = transform.position.y + 0.478f;
         }
     }
 

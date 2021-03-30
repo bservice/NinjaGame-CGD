@@ -437,3 +437,4 @@ MonoBehaviour:
   rightPos: 0
   leftPos: 0
   speed: 3
+  bulletPrefab: {fileID: -7277673673745329842, guid: f6381f8c20f0ada49bfef268c55b46c7, type: 3}

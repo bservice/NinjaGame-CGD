@@ -15,6 +15,7 @@ public class Wall : MonoBehaviour
     {
         player = FindObjectOfType<Player>();
         sceneController = GameObject.Find("SceneController");
+        Debug.Log(GetComponent<BoxCollider2D>().tag);
     }
 
     // Update is called once per frame
