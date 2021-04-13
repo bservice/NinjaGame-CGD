@@ -39,11 +39,14 @@ public class SceneManagement : MonoBehaviour
 
         Vector3 temp = new Vector3(0, 0, -2);
 
-        for (int i = 0; i < 3; i++)
+        if (player != null)
         {
-            dashUI[i] = Instantiate(activated, temp, Quaternion.identity);
+            for (int i = 0; i < 3; i++)
+            {
+                dashUI[i] = Instantiate(activated, temp, Quaternion.identity);
 
-            temp.x += 0.4f;
+                temp.x += 0.4f;
+            }
         }
 
         if (currentState == GameState.GameScene)
@@ -101,32 +104,35 @@ public class SceneManagement : MonoBehaviour
 
         float spacing = 0.4f;
 
-        for(int i = 0; i < dashUI.Length; i++)
+        if (player != null)
         {
-            dashUI[i].transform.position = new Vector3(player.transform.position.x + (spacing * i) + 10, player.transform.position.y - 6.5f, -2);
-        }
-
-        if (player.NumberOfDashes != numberOfDashes)
-        {
-            if (numberOfDashes - player.NumberOfDashes == -1)
+            for (int i = 0; i < dashUI.Length; i++)
             {
-                Vector3 position = dashUI[numberOfDashes].transform.position;
-
-                Destroy(dashUI[numberOfDashes]);
-
-                dashUI[numberOfDashes] = Instantiate(activated, position, Quaternion.identity);
+                dashUI[i].transform.position = new Vector3(player.transform.position.x + (spacing * i) + 10, player.transform.position.y - 6.5f, -2);
             }
 
-            else if(numberOfDashes - player.NumberOfDashes == 1)
+            if (player.NumberOfDashes != numberOfDashes)
             {
-                Vector3 position = dashUI[numberOfDashes - 1].transform.position;
+                if (numberOfDashes - player.NumberOfDashes == -1)
+                {
+                    Vector3 position = dashUI[numberOfDashes].transform.position;
 
-                Destroy(dashUI[numberOfDashes - 1]);
+                    Destroy(dashUI[numberOfDashes]);
 
-                dashUI[numberOfDashes - 1] = Instantiate(deactivated, position, Quaternion.identity);
+                    dashUI[numberOfDashes] = Instantiate(activated, position, Quaternion.identity);
+                }
+
+                else if (numberOfDashes - player.NumberOfDashes == 1)
+                {
+                    Vector3 position = dashUI[numberOfDashes - 1].transform.position;
+
+                    Destroy(dashUI[numberOfDashes - 1]);
+
+                    dashUI[numberOfDashes - 1] = Instantiate(deactivated, position, Quaternion.identity);
+                }
+
+                numberOfDashes = player.NumberOfDashes;
             }
-
-            numberOfDashes = player.NumberOfDashes;
         }
     }
 

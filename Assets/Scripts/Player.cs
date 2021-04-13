@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
@@ -28,6 +29,8 @@ public class Player : MonoBehaviour
     private bool raycastHit;
     private bool attacking;
 
+    private int health;
+
     // Pusblic Variables
 
     public int movementLevel;
@@ -39,6 +42,11 @@ public class Player : MonoBehaviour
     public bool Attacking
     {
         get { return attacking; }
+    }
+    public int Health
+    {
+        get { return health; }
+        set { health = value; }
     }
 
     public int NumberOfDashes
@@ -59,6 +67,8 @@ public class Player : MonoBehaviour
         isDashing = false;
         raycastHit = false;
         attacking = false;
+
+        health = 3;
 
         previousPositions = new Queue<Vector2>();
 
@@ -88,6 +98,7 @@ public class Player : MonoBehaviour
         if(!isDashing)
             Move();
         Attack();
+        Death();
 
         Camera.main.transform.position = new Vector3(rigidBody.transform.position.x, rigidBody.transform.position.y, -10.0f);
 
@@ -320,6 +331,14 @@ public class Player : MonoBehaviour
                 attacking = false;
                 timeLeft = 0.2f;
             }
+        }
+    }
+
+    private void Death()
+    {
+        if (health <= 0)
+        {
+            SceneManager.LoadScene("GameOverScene");
         }
     }
 }

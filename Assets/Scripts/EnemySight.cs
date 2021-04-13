@@ -21,13 +21,16 @@ public class EnemySight : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(enemy.Left)
+        if (!enemy.autoShoot)
         {
-            transform.localScale = new Vector3(-1.0f, 1.0f, 0.0f);
-        }
-        else if (enemy.Right)
-        {
-            transform.localScale = new Vector3(1.0f, 1.0f, 0.0f);
+            if (enemy.Left)
+            {
+                transform.localScale = new Vector3(-1.0f, 1.0f, 0.0f);
+            }
+            else if (enemy.Right)
+            {
+                transform.localScale = new Vector3(1.0f, 1.0f, 0.0f);
+            }
         }
     }
 
