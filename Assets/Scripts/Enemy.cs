@@ -160,6 +160,8 @@ public class Enemy : MonoBehaviour
             if (player.movementLevel < 4)
             {
                 player.killedAnEnemy = true;
+                player.enemyPosition = rigidBody.transform.position;
+                player.lockTime = 0;
             }
             sceneController.GetComponent<SceneManagement>().score += 100;
             Destroy(this);
