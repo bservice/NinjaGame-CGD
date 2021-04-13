@@ -4,65 +4,79 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    // Private Variables
     [SerializeField] private LayerMask platforms;
 
     private Rigidbody2D rigidBody;
     private BoxCollider2D playerCollider;
+    private PlayerAnim anim;
+    private GameObject sceneController;
 
     private Vector2 positionDashedFrom;
+    private Vector2 dashEndPosition;
+    private Queue<Vector2> previousPositions;
 
-    private float jumpValue;
     private float[] movementSpeed;
-    private float friction;
-    private float dashDistance;
-    private float dashCooldown;
     private float deltaTime;
+    private float timeSinceLastDash;
+    private float timeLeft;
+    public float lockTime;
+    
+    private int numberOfDashes;
+
+    private bool isDashing;
+    private bool raycastHit;
+    private bool attacking;
+
+    // Pusblic Variables
 
     public int movementLevel;
 
-    private bool stopFriction;
     public bool killedAnEnemy;
 
-    private bool attacking;
-    private float timeLeft;
-
-    private PlayerAnim anim;
-
-    private GameObject sceneController;
+    public Vector2 enemyPosition;
 
     public bool Attacking
     {
         get { return attacking; }
     }
 
+    public int NumberOfDashes
+    {
+        get { return numberOfDashes; }
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        movementSpeed = new float[] { 4.5f, 5.25f, 5.75f, 6.25f, 6.5f };
-        friction = 0.98f;
-        jumpValue = 6.0f;
-        dashDistance = 0.5f;
-        dashCooldown = 1.0f;
+        movementSpeed = new float[] { 5.5f, 6.25f, 6.75f, 7.25f, 7.5f };
+
         deltaTime = 0.0f;
-
         movementLevel = 0;
-
-        stopFriction = false;
-
-        attacking = false;
         timeLeft = 0.2f;
+        numberOfDashes = 3;
+
+        isDashing = false;
+        raycastHit = false;
+        attacking = false;
+
+        previousPositions = new Queue<Vector2>();
 
         rigidBody = transform.GetComponent<Rigidbody2D>();
         playerCollider = transform.GetComponent<BoxCollider2D>();
         anim = transform.GetComponentInChildren<PlayerAnim>();
 
         sceneController = GameObject.Find("SceneController");
+
+        Physics2D.gravity = new Vector2(0, -40.0f);
     }
 
     // Update is called once per frame
     void Update()
     {
         deltaTime += Time.deltaTime;
+        timeSinceLastDash += Time.deltaTime;
+        lockTime += Time.deltaTime;
 
         if (sceneController.GetComponent<SceneManagement>().paused)
         {
@@ -71,37 +85,50 @@ public class Player : MonoBehaviour
 
         Jump();
         Dash();
-        Move();
+        if(!isDashing)
+            Move();
         Attack();
 
         Camera.main.transform.position = new Vector3(rigidBody.transform.position.x, rigidBody.transform.position.y, -10.0f);
 
         anim.AnimUpdate(rigidBody.velocity.x, rigidBody.velocity.y, Grounded(), attacking);
+
+        previousPositions.Enqueue(rigidBody.transform.position);
+
+        if (previousPositions.Count > 4)
+        {
+            previousPositions.Dequeue();
+        }
+
+        ReplenishDash();
     }
 
     private void Jump()
     {
+        float jumpValue = 5.0f;
+
         if (Grounded() && Input.GetKeyDown(KeyCode.Space))
         {
-            rigidBody.velocity = Vector2.up * jumpValue;
+            rigidBody.velocity = Vector2.up * (jumpValue + (movementSpeed[movementLevel] * 2));
         }
     }
 
     private void Move()
     {
+        float friction = 0.98f;
+
         if (Input.GetKey(KeyCode.A))
         {
-            rigidBody.velocity = new Vector2(-movementSpeed[movementLevel], rigidBody.velocity.y);
+            rigidBody.velocity = new Vector2(-movementSpeed[movementLevel] * 2, rigidBody.velocity.y);
         }
         else if (Input.GetKey(KeyCode.D))
         {
-            rigidBody.velocity = new Vector2(movementSpeed[movementLevel], rigidBody.velocity.y);
+            rigidBody.velocity = new Vector2(movementSpeed[movementLevel] * 2, rigidBody.velocity.y);
         }
         else
         {
             if (Grounded())
             {
-
                 rigidBody.velocity = new Vector2(rigidBody.velocity.x * friction, rigidBody.velocity.y);
 
                 if (rigidBody.velocity.x < 0.00001f && rigidBody.velocity.x > -0.00001f)
@@ -114,62 +141,127 @@ public class Player : MonoBehaviour
 
     private void Dash()
     {
+        // Loacal Variables
+        float dashDistance = 2.5f;
         Vector2 playerPosition = rigidBody.transform.position;
-        Vector2 normalizedDist = playerPosition + positionDashedFrom;
-        normalizedDist.Normalize();
 
-        float distance = Vector2.Distance(playerPosition, playerPosition + (normalizedDist * (dashDistance * (movementLevel + 1))));
-
-        if(HitWall())
-        {
-
-            distance = dashDistance * movementLevel;
-            rigidBody.gravityScale = 1.0f;
-        }
-
-        if (distance >= (dashDistance * (movementLevel + 1)) && !stopFriction)
-        {
-            rigidBody.gravityScale = 1.0f;
-
-            rigidBody.velocity = new Vector2(rigidBody.velocity.x * friction, rigidBody.velocity.y);
-
-            if (rigidBody.velocity.x < 0.00001f && rigidBody.velocity.x > -0.00001f)
-            {
-                stopFriction = true;
-                rigidBody.velocity = new Vector2(0, rigidBody.velocity.y);
-            }
-
-            if (killedAnEnemy)
-            {
-                Debug.Log("killed");
-
-                killedAnEnemy = false;
-                movementLevel++;
-            }
-        }
-
-        if (dashCooldown < deltaTime)
+        if (numberOfDashes > 0 && timeSinceLastDash > 0.75f)
         {
             if (Input.GetMouseButtonDown(0))
             {
-                deltaTime = 0.0f;
+                // Loacal Variables
+                Vector2 mousePosition;
+                Vector2 dashDirection;
 
-                Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                Vector2 normalizedVector = mousePosition - playerPosition;
+                // Calculate mouse position && direction of the dash
+                mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                dashDirection = mousePosition - playerPosition;
 
-                normalizedVector.Normalize();
+                dashDirection.Normalize();
 
-                float movementX = normalizedVector.x * movementSpeed[movementLevel] * 4;
-                float movementY = normalizedVector.y * movementSpeed[movementLevel] * 4;
+                // Calculate velocity
+                rigidBody.velocity = new Vector2(dashDirection.x * movementSpeed[movementLevel] * 4, dashDirection.y * movementSpeed[movementLevel] * 4);
 
-                rigidBody.velocity = new Vector2(movementX, movementY);
+                // Calculate the end Position of the dash
+                dashEndPosition = dashDirection * (dashDistance * (movementLevel + 1));
+
+                dashEndPosition += playerPosition;
+
+                // Ch
+                RaycastHit2D raycast = Physics2D.Raycast(playerPosition, dashDirection, dashDistance * (movementLevel + 1), platforms);
+
+                if (raycast.collider != null)
+                {
+                    raycastHit = true;
+                    dashEndPosition = raycast.point;
+                }
 
                 positionDashedFrom = playerPosition;
 
-                stopFriction = false;
+                // Dash Physics
+                isDashing = true;
 
+                rigidBody.drag = 0;
                 rigidBody.gravityScale = 0.0f;
+                Physics2D.gravity = Vector2.zero;
+
+                numberOfDashes--;
+
+                if (numberOfDashes < 0)
+                    numberOfDashes = 0;
+
+                timeSinceLastDash = 0;
             }
+        }
+
+        Vector2 temp = positionDashedFrom - dashEndPosition;
+        temp.Normalize();
+
+        temp = temp * dashDistance * (movementLevel + 1);
+
+        Debug.DrawLine(playerPosition, playerPosition - temp, Color.red);
+        Debug.DrawLine(playerPosition, dashEndPosition, Color.white);
+        Debug.DrawLine(Vector2.zero, dashEndPosition, Color.blue);
+
+        float distance = Vector2.Distance(playerPosition, positionDashedFrom);
+
+        float totalDistance = Vector2.Distance(dashEndPosition, positionDashedFrom);
+
+        totalDistance = totalDistance - (raycastHit ? playerCollider.bounds.extents.x : 0);
+
+        if(distance > totalDistance)
+            Debug.Log(distance);
+        Debug.Log(isDashing);
+
+        if (distance >= totalDistance && isDashing)
+        {
+            rigidBody.gravityScale = 1.0f;
+            rigidBody.drag = 0.5f;
+            Physics2D.gravity = new Vector2(0, -40.0f);
+
+            isDashing = false;
+            raycastHit = false;
+
+            if (rigidBody.velocity.x < 0.00001f && rigidBody.velocity.x > -0.00001f)
+            {
+                rigidBody.velocity = new Vector2(0, rigidBody.velocity.y);
+            }
+        }
+
+        if (killedAnEnemy && (lockTime > 1.5f || PressedAKey()))
+        {
+            rigidBody.gravityScale = 1.0f;
+            rigidBody.drag = 0.5f;
+            Physics2D.gravity = new Vector2(0, -40.0f);
+
+            isDashing = false;
+            raycastHit = false;
+            killedAnEnemy = false;
+
+            lockTime = 0;
+            numberOfDashes++;
+
+            if (numberOfDashes > 3)
+                numberOfDashes = 3;
+
+            movementLevel++;
+        }
+        else if(killedAnEnemy && lockTime < 1.5f) 
+        {
+            rigidBody.velocity = Vector2.zero;
+            rigidBody.transform.position = new Vector3(enemyPosition.x, enemyPosition.y + 0.4f);
+            rigidBody.drag = 0;
+            rigidBody.gravityScale = 0.0f;
+            Physics2D.gravity = Vector2.zero;
+        }
+
+        if (IsStuck() && isDashing)
+        {
+            rigidBody.gravityScale = 1.0f;
+            rigidBody.drag = 0.5f;
+            Physics2D.gravity = new Vector2(0, -40.0f);
+
+            isDashing = false;
         }
     }
 
@@ -180,26 +272,37 @@ public class Player : MonoBehaviour
         return raycast.collider != null;
     }
 
-    private bool HitWall()
+    private void ReplenishDash()
     {
-        RaycastHit2D raycast;
+        float dashCooldown = 3.5f;
 
-        raycast = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0.0f, Vector2.up, 0.1f, platforms);
+        if (deltaTime > dashCooldown)
+        {
+            deltaTime = 0.0f;
 
-        if (raycast.collider != null)
-            return raycast.collider != null;
+            numberOfDashes++;
 
-        raycast = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0.0f, Vector2.left, 0.1f, platforms);
+            if (numberOfDashes > 3)
+                numberOfDashes = 3;
+        }
+    }
 
-        if (raycast.collider != null)
-            return raycast.collider != null;
+    private bool IsStuck() 
+    {
+        Vector2 playerPosition = rigidBody.transform.position;
 
-        raycast = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0.0f, Vector2.right, 0.1f, platforms);
+        foreach (Vector2 position in previousPositions)
+        {
+            if (position != playerPosition)
+                return false;
+        }
 
-        if (raycast.collider != null)
-            return raycast.collider != null;
+        return true;
+    }
 
-        return false;
+    private bool PressedAKey() 
+    {
+        return Input.GetMouseButtonDown(0) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D);
     }
 
     private void Attack()
