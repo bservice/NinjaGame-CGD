@@ -22,6 +22,5 @@ public class EnemyAnim : MonoBehaviour
     public void AnimUpdate(float xVelocity)
     {
         sprite.flipX = xVelocity < 0;
-
     }
 }
