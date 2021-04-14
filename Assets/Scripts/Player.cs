@@ -39,6 +39,10 @@ public class Player : MonoBehaviour
 
     public Vector2 enemyPosition;
 
+    public AudioSource soundPlayer;
+    public AudioClip coinSound;
+    public AudioClip wallSound;
+
     public bool Attacking
     {
         get { return attacking; }
@@ -160,6 +164,9 @@ public class Player : MonoBehaviour
         {
             if (Input.GetMouseButtonDown(0))
             {
+                //Play dash sound
+                soundPlayer.PlayOneShot(soundPlayer.clip);
+
                 // Loacal Variables
                 Vector2 mousePosition;
                 Vector2 dashDirection;
@@ -339,6 +346,19 @@ public class Player : MonoBehaviour
         if (health <= 0)
         {
             SceneManager.LoadScene("GameOverScene");
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        // play pick up soin sound when hitting a coin
+        if (collision.tag == "Coin")
+        {
+            soundPlayer.PlayOneShot(coinSound);
+        }
+        if(collision.tag == "WallTrigger" && attacking && movementLevel == 4)
+        {
+            soundPlayer.PlayOneShot(wallSound);
         }
     }
 }
