@@ -22,6 +22,9 @@ public class SpriteBuilder : MonoBehaviour
     private float m_fPrevX;
     private float m_fPrevY;
 
+    [SerializeField]
+    private bool m_bReload;
+
     public void ChangeSize(Vector3 scale)
     {
         float fXSize = scale.x;
@@ -83,6 +86,7 @@ public class SpriteBuilder : MonoBehaviour
         Vector3 v3CurrentScale = transform.localScale;
         m_fPrevX = v3CurrentScale.x;
         m_fPrevY = v3CurrentScale.y;
+        m_bReload = false;
         ChangeSize(v3CurrentScale);
     }
 
@@ -90,11 +94,13 @@ public class SpriteBuilder : MonoBehaviour
     {
         Vector3 v3CurrentScale = transform.localScale;
         
-        if(v3CurrentScale.x != m_fPrevX || v3CurrentScale.y != m_fPrevY)
+        if(v3CurrentScale.x != m_fPrevX || v3CurrentScale.y != m_fPrevY || m_bReload)
         {
             ChangeSize(v3CurrentScale);
             m_fPrevX = v3CurrentScale.x;
             m_fPrevY = v3CurrentScale.y;
+            m_bReload = false;
+
         }
     }
 }
