@@ -7,6 +7,8 @@ TagManager:
   - Platform
   - Bullet
   - Wall
+  - Coin
+  - WallTrigger
   layers:
   - Default
   - TransparentFX

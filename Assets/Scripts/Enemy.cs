@@ -36,6 +36,8 @@ public class Enemy : MonoBehaviour
 
     private EnemySight sight;
 
+    public AudioSource soundPlayer;
+
     public bool Left
     {
         get { return left; }
@@ -173,6 +175,7 @@ public class Enemy : MonoBehaviour
     private void Shoot()
     {
         bullet = Instantiate(bulletPrefab, new Vector2(transform.position.x, transform.position.y), Quaternion.identity);
+        soundPlayer.PlayOneShot(soundPlayer.clip);
         if (bullet != null)
         {            
             if (right)
