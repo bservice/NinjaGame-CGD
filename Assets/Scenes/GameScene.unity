@@ -2804,8 +2804,10 @@ MonoBehaviour:
   platforms:
     serializedVersion: 2
     m_Bits: 256
+  lockTime: 0
   movementLevel: 0
   killedAnEnemy: 0
+  enemyPosition: {x: 0, y: 0}
 --- !u!1 &1616212052
 GameObject:
   m_ObjectHideFlags: 0
@@ -2837,6 +2839,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentState: 0
   paused: 0
+  activated: {fileID: 5577582650927953200, guid: 5640392f00707bc42baf2a0b449e0341, type: 3}
+  deactivated: {fileID: 8117956499719851729, guid: 12331f2b65e915f4995d86a5757357eb, type: 3}
   timePassed: 0
   score: 0
 --- !u!4 &1616212054

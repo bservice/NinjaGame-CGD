@@ -22,6 +22,9 @@ public class Enemy : MonoBehaviour
     public float shootTime;
     private float firstShootTime;
 
+    public float sightTime;
+    private float firstSightTime;
+
     private GameObject sceneController;
 
     private Player player;
@@ -30,6 +33,18 @@ public class Enemy : MonoBehaviour
 
     public Bullet bulletPrefab;
     private Bullet bullet;
+
+    private EnemySight sight;
+
+    public bool Left
+    {
+        get { return left; }
+    }
+
+    public bool Right
+    {
+        get { return right; }
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -50,7 +65,10 @@ public class Enemy : MonoBehaviour
         rigidBody = GetComponent<Rigidbody2D>();
         spriteRender = GetComponent<SpriteRenderer>();
 
+        sight = GetComponentInChildren<EnemySight>();
+
         firstShootTime = shootTime;
+        firstSightTime = sightTime;
 
         sceneController = GameObject.Find("SceneController");
 
@@ -85,6 +103,21 @@ public class Enemy : MonoBehaviour
                 Shoot();
                 shootTime = firstShootTime;
             }
+        }
+
+        //Shoot if player is within sight
+        if (sight.Attack)
+        {
+            sightTime -= Time.deltaTime;
+            if (sightTime <= 0.0f)
+            {
+                Shoot();
+                sightTime = firstSightTime;
+            }
+        }
+        else
+        {
+            sightTime = firstSightTime;
         }
 
         rigidBody.position += velocity * Time.deltaTime;
@@ -127,6 +160,8 @@ public class Enemy : MonoBehaviour
             if (player.movementLevel < 4)
             {
                 player.killedAnEnemy = true;
+                player.enemyPosition = rigidBody.transform.position;
+                player.lockTime = 0;
             }
             sceneController.GetComponent<SceneManagement>().score += 100;
             Destroy(this);
@@ -139,8 +174,7 @@ public class Enemy : MonoBehaviour
     {
         bullet = Instantiate(bulletPrefab, new Vector2(transform.position.x, transform.position.y), Quaternion.identity);
         if (bullet != null)
-        {
-            
+        {            
             if (right)
             {
                 bullet.Direction = new Vector2(1.0f, 0.0f);

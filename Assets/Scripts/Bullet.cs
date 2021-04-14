@@ -9,6 +9,8 @@ public class Bullet : MonoBehaviour
     private Vector2 acceleration;
     private Vector2 direction;
 
+    private Player player;
+
     public float accelRate;
     public float maxSpeed;
 
@@ -41,7 +43,7 @@ public class Bullet : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        player = FindObjectOfType<Player>();
     }
 
     // Update is called once per frame
@@ -67,6 +69,7 @@ public class Bullet : MonoBehaviour
         if(collision.tag == "Player")
         {
             //Damage player here
+            player.Health -= 1;
             Destroy(gameObject);
         }
 
