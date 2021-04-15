@@ -160,16 +160,15 @@ public class Enemy : MonoBehaviour
     {
         //Is the enemy eligible to be attacked and is the player in an attacking state?
         //*****Can add more requirements for destroy like a speed threshhold here
-        if (attackBounds.Attack && player.Attacking)
+        if (attackBounds.Attack && player.isDashing)
         {
             spriteRender.color = Color.red;
             dead = true;
-            if (player.movementLevel < 4)
-            {
-                player.killedAnEnemy = true;
-                player.enemyPosition = rigidBody.transform.position;
-                player.lockTime = 0;
-            }
+
+            player.killedAnEnemy = true;
+            player.enemyPosition = rigidBody.transform.position;
+            player.lockTime = 0;
+
             sceneController.GetComponent<SceneManagement>().score += 100;
             Destroy(this);
             Destroy(this.gameObject);

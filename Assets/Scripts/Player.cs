@@ -25,7 +25,7 @@ public class Player : MonoBehaviour
     
     private int numberOfDashes;
 
-    private bool isDashing;
+    public bool isDashing;
     private bool raycastHit;
     private bool attacking;
 
@@ -268,6 +268,9 @@ public class Player : MonoBehaviour
                 numberOfDashes = 3;
 
             movementLevel++;
+
+            if (movementLevel > 4)
+                movementLevel = 4;
         }
         else if(killedAnEnemy && lockTime < 1.5f) 
         {
