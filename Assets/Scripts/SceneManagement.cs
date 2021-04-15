@@ -18,6 +18,7 @@ public class SceneManagement : MonoBehaviour
     private Player player;
     private Text scoreText;
     private Text timerText;
+    private Text completionStatusText;
     private int numberOfDashes;
     public float timePassed;
     public int score;
@@ -74,7 +75,24 @@ public class SceneManagement : MonoBehaviour
                 string timeKey = "level" + currentLevel.ToString() + "Time";
 
                 score = PlayerPrefs.GetInt(scoreKey);
-                timePassed = PlayerPrefs.GetInt(timeKey);
+                timePassed = PlayerPrefs.GetFloat(timeKey);
+
+                completionStatusText = GameObject.Find("CompletionStatusText").GetComponent<Text>();
+                scoreText = GameObject.Find("ScoreText").GetComponent<Text>();
+                timerText = GameObject.Find("TimeText").GetComponent<Text>();
+
+                // player lost level
+                if (completionStatus == 0)
+                {
+                    completionStatusText.text = "Game Over";
+                }
+                // player won level
+                else if (completionStatus == 1)
+                {
+                    completionStatusText.text = "Level Complete!";
+                }
+                scoreText.text = "Score: " + score.ToString();
+                timerText.text = "Time: " + TimeToString(timePassed);
                 break;
         }
     }
@@ -104,14 +122,7 @@ public class SceneManagement : MonoBehaviour
                 {
                     timePassed += Time.deltaTime;
 
-                    if (timePassed < 60)
-                    {
-                        timerText.text = Math.Truncate(timePassed % 60).ToString();
-                    }
-                    else
-                    {
-                        timerText.text = Math.Truncate(timePassed / 60).ToString() + ":" + Math.Truncate(timePassed % 60).ToString("00");
-                    }
+                    timerText.text = TimeToString(timePassed);
                 }
 
                 break;
@@ -206,5 +217,22 @@ public class SceneManagement : MonoBehaviour
     public void QuitGame()
     {
         Application.Quit();
+    }
+
+    // Formats floats that represent time into a readable string
+    public string TimeToString(float timeValue)
+    {
+        string timeString;
+
+        if (timeValue < 60)
+        {
+            timeString = Math.Truncate(timeValue % 60).ToString();
+        }
+        else
+        {
+            timeString = Math.Truncate(timeValue / 60).ToString() + ":" + Math.Truncate(timeValue % 60).ToString("00");
+        }
+
+        return timeString;
     }
 }
