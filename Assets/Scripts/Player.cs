@@ -346,7 +346,8 @@ public class Player : MonoBehaviour
     {
         if (health <= 0)
         {
-            SceneManager.LoadScene("GameOverScene");
+            sceneController.GetComponent<SceneManagement>().completionStatus = 0;
+            sceneController.GetComponent<SceneManagement>().ChangeScene("GameOverScene");
         }
     }
 

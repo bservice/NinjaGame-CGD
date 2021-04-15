@@ -7,7 +7,7 @@ using System;
 
 public class SceneManagement : MonoBehaviour
 {
-    public enum GameState { MainMenuScene, GameScene, GameOverScene };
+    public enum GameState { MainMenuScene, Tutorial, GameScene, GameOverScene };
     public GameState currentState;
     public bool paused = false;
     private GameObject pauseUI;
@@ -21,6 +21,8 @@ public class SceneManagement : MonoBehaviour
     private int numberOfDashes;
     public float timePassed;
     public int score;
+    public int currentLevel;
+    public int completionStatus; // 0 if player lost level, 1 if player won level
 
     // Start is called before the first frame update
     void Start()
@@ -49,13 +51,31 @@ public class SceneManagement : MonoBehaviour
             }
         }
 
-        if (currentState == GameState.GameScene)
+        switch (currentState)
         {
-            gameUI = GameObject.Find("GameUI");
-            scoreText = GameObject.Find("ScoreNumberText").GetComponent<Text>();
-            timerText = GameObject.Find("TimerNumberText").GetComponent<Text>();
-            pauseUI = GameObject.Find("PauseScreenUI");
-            pauseUI.SetActive(false);
+            case GameState.MainMenuScene:
+                break;
+            case GameState.Tutorial:
+                currentLevel = 0;
+                break;
+            case GameState.GameScene:
+                gameUI = GameObject.Find("GameUI");
+                scoreText = GameObject.Find("ScoreNumberText").GetComponent<Text>();
+                timerText = GameObject.Find("TimerNumberText").GetComponent<Text>();
+                pauseUI = GameObject.Find("PauseScreenUI");
+                pauseUI.SetActive(false);
+                currentLevel = 1;
+                break;
+            case GameState.GameOverScene:
+                currentLevel = PlayerPrefs.GetInt("currentLevel");
+                completionStatus = PlayerPrefs.GetInt("completionStatus");
+
+                string scoreKey = "level" + currentLevel.ToString() + "Score";
+                string timeKey = "level" + currentLevel.ToString() + "Time";
+
+                score = PlayerPrefs.GetInt(scoreKey);
+                timePassed = PlayerPrefs.GetInt(timeKey);
+                break;
         }
     }
 
@@ -139,10 +159,24 @@ public class SceneManagement : MonoBehaviour
     // Changes the scene to any given scene using GameStates
     public void ChangeScene(GameState nextState)
     {
+        // save game before switching scenes
+        string scoreKey = "level" + currentLevel.ToString() + "Score";
+        string timeKey = "level" + currentLevel.ToString() + "Time";
+
+        PlayerPrefs.SetInt("currentLevel", currentLevel);
+        PlayerPrefs.SetInt("completionStatus", completionStatus);
+        PlayerPrefs.SetInt(scoreKey, score);
+        PlayerPrefs.SetFloat(timeKey, timePassed);
+        PlayerPrefs.Save();
+
+        // switch scenes
         switch (nextState)
         {
             case GameState.MainMenuScene:
                 SceneManager.LoadScene("MainMenuScene");
+                break;
+            case GameState.Tutorial:
+                SceneManager.LoadScene("Tutorial");
                 break;
             case GameState.GameScene:
                 SceneManager.LoadScene("GameScene");
@@ -156,7 +190,8 @@ public class SceneManagement : MonoBehaviour
     // Changes the scene to any given scene using strings
     public void ChangeScene(string nextState)
     {
-        SceneManager.LoadScene(nextState);
+        Enum.TryParse(nextState, out GameState nextGameState);
+        ChangeScene(nextGameState);
     }
 
     // Pauses and unpauses the game when in the Game scene

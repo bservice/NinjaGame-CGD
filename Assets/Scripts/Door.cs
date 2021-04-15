@@ -6,11 +6,12 @@ using UnityEngine.SceneManagement;
 public class Door : MonoBehaviour
 {
     public string scene;
+    private SceneManagement sceneController;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        sceneController = GameObject.Find("SceneController").GetComponent<SceneManagement>();
     }
 
     // Update is called once per frame
@@ -24,7 +25,8 @@ public class Door : MonoBehaviour
         //Check to see if player has entered the door
         if (collision.tag == "Player")
         {
-            SceneManager.LoadScene(scene);
+            sceneController.completionStatus = 1;
+            sceneController.ChangeScene("GameOverScene");
         }
     }
 }
