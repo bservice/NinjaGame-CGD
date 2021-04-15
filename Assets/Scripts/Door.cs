@@ -26,7 +26,7 @@ public class Door : MonoBehaviour
         if (collision.tag == "Player")
         {
             sceneController.completionStatus = 1;
-            sceneController.ChangeScene("GameOverScene");
+            sceneController.ChangeScene(scene);
         }
     }
 }

@@ -909,6 +909,8 @@ MonoBehaviour:
   deactivated: {fileID: 0}
   timePassed: 0
   score: 0
+  currentLevel: 0
+  completionStatus: 0
 --- !u!4 &1482925134
 Transform:
   m_ObjectHideFlags: 0
