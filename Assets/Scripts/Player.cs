@@ -47,32 +47,32 @@ public class Player : MonoBehaviour
     {
         get { return attacking; }
     }
+
+    public int NumberOfDashes
+    {
+        get { return numberOfDashes; }
+    }
     public int Health
     {
         get { return health; }
         set { health = value; }
     }
 
-    public int NumberOfDashes
-    {
-        get { return numberOfDashes; }
-    }
-
     // Start is called before the first frame update
     void Start()
     {
-        movementSpeed = new float[] { 5.5f, 6.25f, 6.75f, 7.25f, 7.5f };
+        movementSpeed = new float[] { 4.75f, 5.50f, 6.00f, 6.5f, 7.0f };
 
         deltaTime = 0.0f;
         movementLevel = 0;
         timeLeft = 0.2f;
         numberOfDashes = 3;
 
+        health = 3;
+
         isDashing = false;
         raycastHit = false;
         attacking = false;
-
-        health = 3;
 
         previousPositions = new Queue<Vector2>();
 
@@ -110,7 +110,7 @@ public class Player : MonoBehaviour
 
         previousPositions.Enqueue(rigidBody.transform.position);
 
-        if (previousPositions.Count > 4)
+        if (previousPositions.Count > 10)
         {
             previousPositions.Dequeue();
         }
@@ -134,7 +134,7 @@ public class Player : MonoBehaviour
 
         if (Input.GetKey(KeyCode.A))
         {
-            rigidBody.velocity = new Vector2(-movementSpeed[movementLevel] * 2, rigidBody.velocity.y);
+            rigidBody.velocity = new Vector2(-movementSpeed[movementLevel] * 2.5f, rigidBody.velocity.y);
         }
         else if (Input.GetKey(KeyCode.D))
         {
@@ -157,14 +157,13 @@ public class Player : MonoBehaviour
     private void Dash()
     {
         // Loacal Variables
-        float dashDistance = 2.5f;
+        float dashDistance = 2.75f;
         Vector2 playerPosition = rigidBody.transform.position;
 
         if (numberOfDashes > 0 && timeSinceLastDash > 0.75f)
         {
             if (Input.GetMouseButtonDown(0))
             {
-                //Play dash sound
                 soundPlayer.PlayOneShot(soundPlayer.clip);
 
                 // Loacal Variables
@@ -231,24 +230,30 @@ public class Player : MonoBehaviour
             Debug.Log(distance);
         Debug.Log(isDashing);
 
-        if (distance >= totalDistance && isDashing)
+        if (isDashing)
         {
-            rigidBody.gravityScale = 1.0f;
-            rigidBody.drag = 0.5f;
-            Physics2D.gravity = new Vector2(0, -40.0f);
+            if (HitWall())
+                distance = totalDistance;
 
-            isDashing = false;
-            raycastHit = false;
-
-            if (rigidBody.velocity.x < 0.00001f && rigidBody.velocity.x > -0.00001f)
+            if (distance >= totalDistance)
             {
-                rigidBody.velocity = new Vector2(0, rigidBody.velocity.y);
+                rigidBody.gravityScale = 0.97f;
+                rigidBody.drag = 0.5f;
+                Physics2D.gravity = new Vector2(0, -40.0f);
+
+                isDashing = false;
+                raycastHit = false;
+
+                if (rigidBody.velocity.x < 0.00001f && rigidBody.velocity.x > -0.00001f)
+                {
+                    rigidBody.velocity = new Vector2(0, rigidBody.velocity.y);
+                }
             }
         }
 
         if (killedAnEnemy && (lockTime > 1.5f || PressedAKey()))
         {
-            rigidBody.gravityScale = 1.0f;
+            rigidBody.gravityScale = 0.98f;
             rigidBody.drag = 0.5f;
             Physics2D.gravity = new Vector2(0, -40.0f);
 
@@ -272,15 +277,6 @@ public class Player : MonoBehaviour
             rigidBody.gravityScale = 0.0f;
             Physics2D.gravity = Vector2.zero;
         }
-
-        if (IsStuck() && isDashing)
-        {
-            rigidBody.gravityScale = 1.0f;
-            rigidBody.drag = 0.5f;
-            Physics2D.gravity = new Vector2(0, -40.0f);
-
-            isDashing = false;
-        }
     }
 
     private bool Grounded()
@@ -288,6 +284,26 @@ public class Player : MonoBehaviour
         RaycastHit2D raycast = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0.0f, Vector2.down, 0.1f, platforms);
 
         return raycast.collider != null;
+    }
+
+    private bool HitWall()
+    {
+        RaycastHit2D raycast = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0.0f, Vector2.left, 0.1f, platforms);
+
+        if (raycast.collider != null)
+            return true;
+
+        raycast = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0.0f, Vector2.right, 0.1f, platforms);
+
+        if (raycast.collider != null)
+            return true;
+
+        raycast = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0.0f, Vector2.up, 0.1f, platforms);
+
+        if (raycast.collider != null)
+            return true;
+
+        return false;
     }
 
     private void ReplenishDash()
@@ -323,24 +339,6 @@ public class Player : MonoBehaviour
         return Input.GetMouseButtonDown(0) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D);
     }
 
-    private void Attack()
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            attacking = true;
-        }
-
-        if (attacking)
-        {
-            timeLeft -= Time.deltaTime;
-            if (timeLeft <= 0)
-            {
-                attacking = false;
-                timeLeft = 0.2f;
-            }
-        }
-    }
-
     private void Death()
     {
         if (health <= 0)
@@ -356,9 +354,27 @@ public class Player : MonoBehaviour
         {
             soundPlayer.PlayOneShot(coinSound);
         }
-        if(collision.tag == "WallTrigger" && attacking && movementLevel == 4)
+        if (collision.tag == "WallTrigger" && attacking && movementLevel == 4)
         {
             soundPlayer.PlayOneShot(wallSound);
+        }
+    }
+
+    private void Attack()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            attacking = true;
+        }
+
+        if (attacking)
+        {
+            timeLeft -= Time.deltaTime;
+            if (timeLeft <= 0)
+            {
+                attacking = false;
+                timeLeft = 0.2f;
+            }
         }
     }
 }
