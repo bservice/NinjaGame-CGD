@@ -14,7 +14,6 @@ public class Enemy : MonoBehaviour
 
     private bool left;
     private bool right;
-    private bool attack;
     private bool dead;
 
     //Booleans to turn off and on auto shoot and how long they should shoot for
@@ -37,6 +36,8 @@ public class Enemy : MonoBehaviour
     private EnemySight sight;
 
     public AudioSource soundPlayer;
+
+    private EnemyAttackBounds attackBounds;
 
     public bool Left
     {
@@ -62,7 +63,6 @@ public class Enemy : MonoBehaviour
             right = false;
         }
         dead = false;
-        attack = false;
         velocity = new Vector2();
         rigidBody = GetComponent<Rigidbody2D>();
         spriteRender = GetComponent<SpriteRenderer>();
@@ -75,6 +75,8 @@ public class Enemy : MonoBehaviour
         sceneController = GameObject.Find("SceneController");
 
         player = FindObjectOfType<Player>();
+
+        attackBounds = GetComponentInChildren<EnemyAttackBounds>();
 
         anim = GetComponentInChildren<EnemyAnim>();
     }
@@ -108,18 +110,21 @@ public class Enemy : MonoBehaviour
         }
 
         //Shoot if player is within sight
-        if (sight.Attack)
+        if (sight != null)
         {
-            sightTime -= Time.deltaTime;
-            if (sightTime <= 0.0f)
+            if (sight.Attack)
             {
-                Shoot();
+                sightTime -= Time.deltaTime;
+                if (sightTime <= 0.0f)
+                {
+                    Shoot();
+                    sightTime = firstSightTime;
+                }
+            }
+            else
+            {
                 sightTime = firstSightTime;
             }
-        }
-        else
-        {
-            sightTime = firstSightTime;
         }
 
         rigidBody.position += velocity * Time.deltaTime;
@@ -155,7 +160,7 @@ public class Enemy : MonoBehaviour
     {
         //Is the enemy eligible to be attacked and is the player in an attacking state?
         //*****Can add more requirements for destroy like a speed threshhold here
-        if (attack && player.Attacking)
+        if (attackBounds.Attack && player.Attacking)
         {
             spriteRender.color = Color.red;
             dead = true;
@@ -188,23 +193,6 @@ public class Enemy : MonoBehaviour
             }
             bullet.Position = transform.position;
             bullet.Y = transform.position.y + 0.478f;
-        }
-    }
-
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        //Mark enemy as eligible to be killed only if the player is within the kill bounds
-        if(collision.tag == "Player")
-        {
-            attack = true;
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D collision)
-    {
-        if (collision.tag == "Player")
-        {
-            attack = false;
         }
     }
 }
