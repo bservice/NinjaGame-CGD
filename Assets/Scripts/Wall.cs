@@ -32,8 +32,8 @@ public class Wall : MonoBehaviour
         {
             player.movementLevel = 0;
             sceneController.GetComponent<SceneManagement>().score += 10;
-            Destroy(this);
-            Destroy(gameObject);
+            gameObject.SetActive(false);
+            //Destroy(gameObject);
         }
     }
 
