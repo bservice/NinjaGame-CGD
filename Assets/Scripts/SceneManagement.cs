@@ -59,6 +59,11 @@ public class SceneManagement : MonoBehaviour
             case GameState.MainMenuScene:
                 break;
             case GameState.Tutorial:
+                gameUI = GameObject.Find("GameUI");
+                scoreText = GameObject.Find("ScoreNumberText").GetComponent<Text>();
+                timerText = GameObject.Find("TimerNumberText").GetComponent<Text>();
+                pauseUI = GameObject.Find("PauseScreenUI");
+                pauseUI.SetActive(false);
                 currentLevel = 0;
                 break;
             case GameState.GameScene:
@@ -117,23 +122,6 @@ public class SceneManagement : MonoBehaviour
 
                 break;
             case GameState.Tutorial:
-                // pause when the player presses the ESCAPE key
-                //if (Input.GetKeyUp(KeyCode.Escape))
-                //{
-                //    TogglePause();
-                //}
-
-                // update the score UI
-                //scoreText.text = score.ToString();
-
-                // track the time it takes for the player to complete the level
-                if (!paused)
-                {
-                    timePassed += Time.deltaTime;
-                    //timerText.text = TimeToString(timePassed);
-                }
-
-                break;
             case GameState.GameScene:
                 // pause when the player presses the ESCAPE key
                 if (Input.GetKeyUp(KeyCode.Escape))
