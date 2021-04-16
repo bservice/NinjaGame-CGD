@@ -5,7 +5,6 @@ using UnityEngine.SceneManagement;
 
 public class Door : MonoBehaviour
 {
-    public string scene;
     private SceneManagement sceneController;
 
     // Start is called before the first frame update
@@ -26,7 +25,7 @@ public class Door : MonoBehaviour
         if (collision.tag == "Player")
         {
             sceneController.completionStatus = 1;
-            sceneController.ChangeScene(scene);
+            sceneController.ChangeScene("GameOverScene");
         }
     }
 }
