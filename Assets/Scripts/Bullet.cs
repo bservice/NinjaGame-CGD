@@ -14,6 +14,9 @@ public class Bullet : MonoBehaviour
     public float accelRate;
     public float maxSpeed;
 
+    private float activationTime;
+    private bool activated;
+
     public Vector2 Position
     {
         get { return position; }
@@ -44,11 +47,22 @@ public class Bullet : MonoBehaviour
     void Start()
     {
         player = FindObjectOfType<Player>();
+        activationTime = 0.5f;
+        activated = false;
     }
 
     // Update is called once per frame
     void Update()
-    {        
+    {
+        if (!activated)
+        {
+            activationTime -= Time.deltaTime;
+            if (activationTime >= 0)
+            {
+                activated = true;
+            }
+        }
+
         transform.position = position;
         Shoot();
     }
@@ -66,7 +80,7 @@ public class Bullet : MonoBehaviour
 
     public void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.tag == "Player")
+        if(collision.tag == "Player" && activated)
         {
             //Damage player here
             player.Health -= 1;
