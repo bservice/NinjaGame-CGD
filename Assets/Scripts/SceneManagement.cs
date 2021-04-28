@@ -32,13 +32,20 @@ public class SceneManagement : MonoBehaviour
     public int completionStatus; // 0 if player lost level, 1 if player won level
     public float screenWidth;
     public float screenHeight;
+    private bool sceneNameParsed = false;
 
     // Start is called before the first frame update
     void Start()
     {
         // update the current state when a scene is loaded
-        Enum.TryParse(SceneManager.GetActiveScene().name, out currentState);
-
+        sceneNameParsed = Enum.TryParse(SceneManager.GetActiveScene().name, out currentState);
+        
+        // if the scene name does not match a game state, set it to the GameScene
+        if (!sceneNameParsed)
+        {
+            currentState = GameState.GameScene;
+        }
+        
         screenHeight = Camera.main.orthographicSize;
         screenWidth = Camera.main.aspect * screenHeight;
 
@@ -64,7 +71,7 @@ public class SceneManagement : MonoBehaviour
                 temp.x += 0.4f;
             }
         }
-
+        
         switch (currentState)
         {
             case GameState.MainMenuScene:
@@ -93,7 +100,7 @@ public class SceneManagement : MonoBehaviour
                 string highScoreKey = "level" + currentLevel.ToString() + "HighScore";
                 string timeKey = "level" + currentLevel.ToString() + "Time";
                 string bestTimeKey = "level" + currentLevel.ToString() + "BestTime";
-                Debug.Log(currentLevel.ToString());
+                
                 score = PlayerPrefs.GetInt(scoreKey);
                 timePassed = PlayerPrefs.GetFloat(timeKey);
 
