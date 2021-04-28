@@ -13,8 +13,11 @@ public class SceneManagement : MonoBehaviour
     private GameObject pauseUI;
     private GameObject gameUI;
     private GameObject[] dashUI;
-    public GameObject activated;
-    public GameObject deactivated;
+    private GameObject[] healthUI;
+    public GameObject activated_d;
+    public GameObject deactivated_d;
+    public GameObject activated_h;
+    public GameObject deactivated_h;
     private Player player;
     private Text scoreText;
     private Text highScoreText;
@@ -22,10 +25,13 @@ public class SceneManagement : MonoBehaviour
     private Text bestTimeText;
     private Text completionStatusText;
     private int numberOfDashes;
+    private int playerHealth;
     public float timePassed;
     public int score;
     public int currentLevel;
     public int completionStatus; // 0 if player lost level, 1 if player won level
+    public float screenWidth;
+    public float screenHeight;
 
     // Start is called before the first frame update
     void Start()
@@ -33,7 +39,11 @@ public class SceneManagement : MonoBehaviour
         // update the current state when a scene is loaded
         Enum.TryParse(SceneManager.GetActiveScene().name, out currentState);
 
+        screenHeight = Camera.main.orthographicSize;
+        screenWidth = Camera.main.aspect * screenHeight;
+
         dashUI = new GameObject[3];
+        healthUI = new GameObject[3];
 
         paused = false;
         score = 0;
@@ -48,7 +58,8 @@ public class SceneManagement : MonoBehaviour
         {
             for (int i = 0; i < 3; i++)
             {
-                dashUI[i] = Instantiate(activated, temp, Quaternion.identity);
+                dashUI[i] = Instantiate(activated_d, temp, Quaternion.identity);
+                healthUI[i] = Instantiate(activated_h, temp, Quaternion.identity);
 
                 temp.x += 0.4f;
             }
@@ -151,9 +162,13 @@ public class SceneManagement : MonoBehaviour
 
         if (player != null)
         {
+            Camera cam = Camera.main;
+            float padding = 0.3f;
+
             for (int i = 0; i < dashUI.Length; i++)
             {
-                dashUI[i].transform.position = new Vector3(player.transform.position.x + (spacing * i) + 10, player.transform.position.y - 6.5f, -2);
+                dashUI[i].transform.position = new Vector3(cam.transform.position.x + screenWidth - padding - (.4f * i), cam.transform.position.y - screenHeight + padding, -2);
+                healthUI[i].transform.position = new Vector3(cam.transform.position.x + screenWidth - padding - (.4f * i), cam.transform.position.y - screenHeight + padding + .4f, -2);
             }
 
             if (player.NumberOfDashes != numberOfDashes)
@@ -164,7 +179,7 @@ public class SceneManagement : MonoBehaviour
 
                     Destroy(dashUI[numberOfDashes]);
 
-                    dashUI[numberOfDashes] = Instantiate(activated, position, Quaternion.identity);
+                    dashUI[numberOfDashes] = Instantiate(activated_d, position, Quaternion.identity);
                 }
 
                 else if (numberOfDashes - player.NumberOfDashes == 1)
@@ -173,10 +188,33 @@ public class SceneManagement : MonoBehaviour
 
                     Destroy(dashUI[numberOfDashes - 1]);
 
-                    dashUI[numberOfDashes - 1] = Instantiate(deactivated, position, Quaternion.identity);
+                    dashUI[numberOfDashes - 1] = Instantiate(deactivated_d, position, Quaternion.identity);
                 }
 
                 numberOfDashes = player.NumberOfDashes;
+            }
+
+            if (player.Health != playerHealth)
+            {
+                if (playerHealth - player.Health == -1)
+                {
+                    Vector3 position = healthUI[playerHealth].transform.position;
+
+                    Destroy(healthUI[playerHealth]);
+
+                    healthUI[playerHealth] = Instantiate(activated_h, position, Quaternion.identity);
+                }
+
+                else if (playerHealth - player.Health == 1)
+                {
+                    Vector3 position = healthUI[playerHealth - 1].transform.position;
+
+                    Destroy(healthUI[playerHealth - 1]);
+
+                    healthUI[playerHealth - 1] = Instantiate(deactivated_h, position, Quaternion.identity);
+                }
+
+                playerHealth = player.Health;
             }
         }
     }

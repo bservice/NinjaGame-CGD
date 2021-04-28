@@ -323,6 +323,20 @@ public class Player : MonoBehaviour
                 numberOfDashes = 3;
         }
     }
+    private void ReplenishHealth()
+    {
+        float dashCooldown = 3.5f;
+
+        if (deltaTime > dashCooldown)
+        {
+            deltaTime = 0.0f;
+
+            numberOfDashes++;
+
+            if (numberOfDashes > 3)
+                numberOfDashes = 3;
+        }
+    }
 
     private bool IsStuck() 
     {
