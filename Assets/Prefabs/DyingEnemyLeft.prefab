@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 6579355475912437831}
   - component: {fileID: 1141083235278334921}
-  - component: {fileID: 2995325226742082004}
+  - component: {fileID: -9110687361120989147}
   m_Layer: 0
-  m_Name: DyingEnemy
+  m_Name: DyingEnemyLeft
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45,7 +45,7 @@ Animator:
   m_GameObject: {fileID: 651978515889898811}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 70bc05808c1c2bf4abb5205355b0ed40, type: 2}
+  m_Controller: {fileID: 9100000, guid: 494812ae87fa1a9408288b89f6df75e4, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -54,7 +54,7 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
---- !u!114 &2995325226742082004
+--- !u!114 &-9110687361120989147
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -66,7 +66,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe5cc41d100bf354e8fd613f9d5cc876, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animation: {fileID: 7400000, guid: 66488be18c4af294d8a7c2dfabad6cd7, type: 2}
+  animation: {fileID: 7400000, guid: 451137f59b2ecfb4da107cd03dc7971c, type: 2}
 --- !u!1 &1701595897499094762
 GameObject:
   m_ObjectHideFlags: 0

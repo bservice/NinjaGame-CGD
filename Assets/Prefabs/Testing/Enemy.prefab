@@ -527,6 +527,8 @@ MonoBehaviour:
   sightTime: 1
   bulletPrefab: {fileID: -7277673673745329842, guid: f6381f8c20f0ada49bfef268c55b46c7, type: 3}
   soundPlayer: {fileID: 4185976247938462647}
+  leftDeath: {fileID: 651978515889898811, guid: 15b77a2dccba03a459ed0d7de4f1533a, type: 3}
+  rightDeath: {fileID: 651978515889898811, guid: 6028fce717e1c35478355e298e7a6691, type: 3}
 --- !u!82 &4185976247938462647
 AudioSource:
   m_ObjectHideFlags: 0

@@ -39,6 +39,11 @@ public class Enemy : MonoBehaviour
 
     private EnemyAttackBounds attackBounds;
 
+    [SerializeField]
+    private GameObject leftDeath;
+    [SerializeField]
+    private GameObject rightDeath;
+
     public bool Left
     {
         get { return left; }
@@ -170,8 +175,20 @@ public class Enemy : MonoBehaviour
             player.lockTime = 0;
 
             sceneController.GetComponent<SceneManagement>().score += 100;
+
+            if (player.FacingRight)
+            {
+                Instantiate(leftDeath, transform.position, Quaternion.identity);
+            }
+            else
+            {
+                Instantiate(rightDeath, transform.position, Quaternion.identity);
+            }
+
             Destroy(this);
             Destroy(this.gameObject);
+
+            
         }
     }
 

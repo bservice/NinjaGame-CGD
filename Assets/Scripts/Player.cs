@@ -58,6 +58,11 @@ public class Player : MonoBehaviour
         set { health = value; }
     }
 
+    public bool FacingRight
+    {
+        get { return rigidBody.velocity.x > 0; }
+    }
+
     // Start is called before the first frame update
     void Start()
     {
