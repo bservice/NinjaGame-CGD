@@ -103,10 +103,12 @@ public class Enemy : MonoBehaviour
             MoveBackAndForth();
         }
 
+        bool playShoot = false;
         //Only allow auto shooting if it is turned on
         if (autoShoot)
         {
             shootTime -= Time.deltaTime;
+            playShoot = shootTime < 0.55f && shootTime > 0.45f;
             if (shootTime <= 0.0f)
             {
                 Shoot();
@@ -120,6 +122,7 @@ public class Enemy : MonoBehaviour
             if (sight.Attack)
             {
                 sightTime -= Time.deltaTime;
+                playShoot = shootTime < 0.55f && shootTime > 0.45f;
                 if (sightTime <= 0.0f)
                 {
                     Shoot();
@@ -135,6 +138,7 @@ public class Enemy : MonoBehaviour
         rigidBody.position += velocity * Time.deltaTime;
 
         anim.AnimUpdate(velocity.x);
+        anim.Shoot(playShoot);
 
         velocity = Vector2.zero;
     }
@@ -176,13 +180,14 @@ public class Enemy : MonoBehaviour
 
             sceneController.GetComponent<SceneManagement>().score += 100;
 
+            Vector3 spawnPos = new Vector3(transform.position.x, transform.position.y + 1);
             if (player.FacingRight)
             {
-                Instantiate(leftDeath, transform.position, Quaternion.identity);
+                Instantiate(leftDeath, spawnPos, Quaternion.identity);
             }
             else
             {
-                Instantiate(rightDeath, transform.position, Quaternion.identity);
+                Instantiate(rightDeath, spawnPos, Quaternion.identity);
             }
 
             Destroy(this);

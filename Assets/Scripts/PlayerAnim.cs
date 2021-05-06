@@ -23,20 +23,22 @@ public class PlayerAnim : MonoBehaviour
 
     public void AnimUpdate(float xVelocity, float yVelocity, bool grounded, bool attacking)
     {
-        sprite.flipX = xVelocity < 0;
+        sprite.flipX = xVelocity == 0 ? sprite.flipX :xVelocity < 0.0f;
 
-        if (attacking == slashing)
-            return;
+        
 
         if (attacking)
         {
+            if (attacking == slashing)
+                return;
             animator.ActivateTrigger("Attack");
         }
         else
         {
-        animator.SetBool("Moving", Mathf.Abs(xVelocity) > 0);
+        animator.SetBool("Moving", Mathf.Abs(xVelocity) > 0.0f);
         }
-            slashing = attacking;
-        
+            
+        slashing = attacking;
+
     }
 }
