@@ -79,6 +79,9 @@ public class SceneManagement : MonoBehaviour
         switch (currentState)
         {
             case GameState.MainMenuScene:
+                // Uncomment the next 2 lines to reset your save file when the main menu scene is loaded
+                //PlayerPrefs.DeleteAll();
+                //PlayerPrefs.Save();
                 break;
             case GameState.Tutorial:
                 gameUI = GameObject.Find("GameUI");
@@ -126,9 +129,26 @@ public class SceneManagement : MonoBehaviour
                 }
 
                 scoreText.text = "Score: " + score.ToString();
-                highScoreText.text = "High Score: " + PlayerPrefs.GetInt(highScoreKey).ToString();
+
+                if (PlayerPrefs.HasKey(highScoreKey))
+                {
+                    highScoreText.text = "High Score: " + PlayerPrefs.GetInt(highScoreKey).ToString();
+                }
+                else
+                {
+                    highScoreText.text = "No High Score Yet";
+                }
+                
                 timerText.text = "Time: " + TimeToString(timePassed);
-                bestTimeText.text = "Best Time: " + TimeToString(PlayerPrefs.GetFloat(bestTimeKey));
+
+                if (PlayerPrefs.HasKey(bestTimeKey))
+                {
+                    bestTimeText.text = "Best Time: " + TimeToString(PlayerPrefs.GetFloat(bestTimeKey));
+                }
+                else
+                {
+                    bestTimeText.text = "No Best Time Yet";
+                }
                 break;
         }
     }
@@ -311,7 +331,6 @@ public class SceneManagement : MonoBehaviour
     // Saves the game
     public void SaveGame()
     {
-        Debug.Log("Current Level: "+currentLevel);
         string scoreKey = "level" + currentLevel.ToString() + "Score";
         string highScoreKey = "level" + currentLevel.ToString() + "HighScore";
         string timeKey = "level" + currentLevel.ToString() + "Time";
@@ -330,7 +349,7 @@ public class SceneManagement : MonoBehaviour
                 PlayerPrefs.SetInt(highScoreKey, score);
             }
         }
-        else
+        else if (completionStatus == 1)
         {
             PlayerPrefs.SetInt(highScoreKey, score);
         }
@@ -343,7 +362,7 @@ public class SceneManagement : MonoBehaviour
                 PlayerPrefs.SetFloat(bestTimeKey, timePassed);
             }
         }
-        else
+        else if (completionStatus == 1)
         {
             PlayerPrefs.SetFloat(bestTimeKey, timePassed);
         }
