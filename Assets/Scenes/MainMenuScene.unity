@@ -905,12 +905,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentState: 0
   paused: 0
-  activated: {fileID: 0}
-  deactivated: {fileID: 0}
+  activated_d: {fileID: 0}
+  deactivated_d: {fileID: 0}
+  activated_h: {fileID: 0}
+  deactivated_h: {fileID: 0}
   timePassed: 0
   score: 0
+  scoreModifier: 0
   currentLevel: 0
   completionStatus: 0
+  screenWidth: 0
+  screenHeight: 0
 --- !u!4 &1482925134
 Transform:
   m_ObjectHideFlags: 0

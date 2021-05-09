@@ -31,7 +31,7 @@ public class Wall : MonoBehaviour
         if (attack && player.isDashing && player.movementLevel == 4)
         {
             player.movementLevel = 0;
-            sceneController.GetComponent<SceneManagement>().score += 10;
+            sceneController.GetComponent<SceneManagement>().AddScore(10);
             gameObject.SetActive(false);
             //Destroy(gameObject);
         }

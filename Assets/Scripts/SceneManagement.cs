@@ -19,6 +19,8 @@ public class SceneManagement : MonoBehaviour
     public GameObject activated_h;
     public GameObject deactivated_h;
     private Player player;
+    private Text gameScoreText;
+    private Text gameTimerText;
     private Text scoreText;
     private Text highScoreText;
     private Text timerText;
@@ -28,6 +30,7 @@ public class SceneManagement : MonoBehaviour
     private int playerHealth;
     public float timePassed;
     public int score;
+    public int scoreModifier;
     public int currentLevel;
     public int completionStatus; // 0 if player lost level, 1 if player won level
     public float screenWidth;
@@ -54,6 +57,7 @@ public class SceneManagement : MonoBehaviour
 
         paused = false;
         score = 0;
+        scoreModifier = 1;
         timePassed = 0;
         numberOfDashes = 3;
 
@@ -78,19 +82,19 @@ public class SceneManagement : MonoBehaviour
                 break;
             case GameState.Tutorial:
                 gameUI = GameObject.Find("GameUI");
-                scoreText = GameObject.Find("ScoreNumberText").GetComponent<Text>();
-                timerText = GameObject.Find("TimerNumberText").GetComponent<Text>();
+                gameScoreText = GameObject.Find("ScoreNumberText").GetComponent<Text>();
+                gameTimerText = GameObject.Find("TimerNumberText").GetComponent<Text>();
                 pauseUI = GameObject.Find("PauseScreenUI");
                 pauseUI.SetActive(false);
                 currentLevel = 0;
                 break;
             case GameState.GameScene:
                 gameUI = GameObject.Find("GameUI");
-                scoreText = GameObject.Find("ScoreNumberText").GetComponent<Text>();
-                timerText = GameObject.Find("TimerNumberText").GetComponent<Text>();
+                gameScoreText = GameObject.Find("ScoreNumberText").GetComponent<Text>();
+                gameTimerText = GameObject.Find("TimerNumberText").GetComponent<Text>();
                 pauseUI = GameObject.Find("PauseScreenUI");
                 pauseUI.SetActive(false);
-                currentLevel = 1;
+                currentLevel = PlayerPrefs.GetInt("currentLevel");
                 break;
             case GameState.GameOverScene:
                 currentLevel = PlayerPrefs.GetInt("currentLevel");
@@ -100,7 +104,7 @@ public class SceneManagement : MonoBehaviour
                 string highScoreKey = "level" + currentLevel.ToString() + "HighScore";
                 string timeKey = "level" + currentLevel.ToString() + "Time";
                 string bestTimeKey = "level" + currentLevel.ToString() + "BestTime";
-                
+
                 score = PlayerPrefs.GetInt(scoreKey);
                 timePassed = PlayerPrefs.GetFloat(timeKey);
 
@@ -148,13 +152,13 @@ public class SceneManagement : MonoBehaviour
                 }
 
                 // update the score UI
-                scoreText.text = score.ToString();
+                gameScoreText.text = score.ToString();
 
                 // track the time it takes for the player to complete the level
                 if (!paused)
                 {
                     timePassed += Time.deltaTime;
-                    timerText.text = TimeToString(timePassed);
+                    gameTimerText.text = TimeToString(timePassed);
                 }
 
                 break;
@@ -229,12 +233,90 @@ public class SceneManagement : MonoBehaviour
     // Changes the scene to any given scene using GameStates
     public void ChangeScene(GameState nextState)
     {
-        // save game before switching scenes
+        if (currentState == GameState.Tutorial || currentState == GameState.GameScene)
+        {
+            SaveGame();
+        }
+
+        // switch scenes
+        switch (nextState)
+        {
+            case GameState.MainMenuScene:
+                SceneManager.LoadScene("MainMenuScene");
+                break;
+            case GameState.Tutorial:
+                SceneManager.LoadScene("Tutorial");
+                break;
+            case GameState.GameScene:
+                if (currentLevel == 1 || currentLevel > 3)  // CHANGE IF MORE LEVELS ARE ADDED
+                {
+                    SceneManager.LoadScene("GameScene");
+                }
+                else
+                {
+                    SceneManager.LoadScene("Level" + (currentLevel - 1).ToString());
+                }
+                break;
+            case GameState.GameOverScene:
+                SceneManager.LoadScene("GameOverScene");
+                break;
+        }
+    }
+
+    // Changes the scene to any given scene using strings
+    public void ChangeScene(string nextState)
+    {
+        Enum.TryParse(nextState, out GameState nextGameState);
+        ChangeScene(nextGameState);
+    }
+
+    // Pauses and unpauses the game when in the Game scene
+    public void TogglePause()
+    {
+        paused = !paused;
+        pauseUI.SetActive(paused);
+        gameUI.SetActive(!gameUI.activeSelf);
+    }
+
+    // Goes to the next level
+    public void NextLevel()
+    {
+        currentLevel++;
+
+        if (currentLevel > 1)
+        {
+            currentState = (GameState)(2);
+        }
+        else
+        {
+            currentState = (GameState)(currentLevel + 1);
+        }
+
+        ChangeScene(currentState);
+    }
+
+    // Play the current level again
+    public void PlayAgain()
+    {
+        currentState = (GameState)(currentLevel + 1);
+        ChangeScene(currentState);
+    }
+
+    // Closes the game
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
+
+    // Saves the game
+    public void SaveGame()
+    {
+        Debug.Log("Current Level: "+currentLevel);
         string scoreKey = "level" + currentLevel.ToString() + "Score";
         string highScoreKey = "level" + currentLevel.ToString() + "HighScore";
         string timeKey = "level" + currentLevel.ToString() + "Time";
         string bestTimeKey = "level" + currentLevel.ToString() + "BestTime";
-        
+
         PlayerPrefs.SetInt("currentLevel", currentLevel);
         PlayerPrefs.SetInt("completionStatus", completionStatus);
         PlayerPrefs.SetInt(scoreKey, score);
@@ -267,66 +349,6 @@ public class SceneManagement : MonoBehaviour
         }
 
         PlayerPrefs.Save();
-
-        // switch scenes
-        switch (nextState)
-        {
-            case GameState.MainMenuScene:
-                SceneManager.LoadScene("MainMenuScene");
-                break;
-            case GameState.Tutorial:
-                SceneManager.LoadScene("Tutorial");
-                break;
-            case GameState.GameScene:
-                SceneManager.LoadScene("GameScene");
-                break;
-            case GameState.GameOverScene:
-                SceneManager.LoadScene("GameOverScene");
-                break;
-        }
-    }
-
-    // Changes the scene to any given scene using strings
-    public void ChangeScene(string nextState)
-    {
-        Enum.TryParse(nextState, out GameState nextGameState);
-        ChangeScene(nextGameState);
-    }
-
-    // Pauses and unpauses the game when in the Game scene
-    public void TogglePause()
-    {
-        paused = !paused;
-        pauseUI.SetActive(paused);
-        gameUI.SetActive(!gameUI.activeSelf);
-    }
-
-    // Goes to the next level
-    public void NextLevel()
-    {
-        currentLevel++;
-
-        // REMOVE OR CHANGE WHEN MORE LEVELS ARE ADDED
-        if (currentLevel > 1)
-        {
-            currentLevel = 1;
-        }
-
-        currentState = (GameState)(currentLevel + 1);
-        ChangeScene(currentState);
-    }
-
-    // Play the current level again
-    public void PlayAgain()
-    {
-        currentState = (GameState)(currentLevel + 1);
-        ChangeScene(currentState);
-    }
-
-    // Closes the game
-    public void QuitGame()
-    {
-        Application.Quit();
     }
 
     // Formats floats that represent time into a readable string
@@ -344,5 +366,11 @@ public class SceneManagement : MonoBehaviour
         }
 
         return timeString;
+    }
+
+    // Modify the current score
+    public void AddScore(int scoreChange)
+    {
+        score += scoreChange * scoreModifier;
     }
 }

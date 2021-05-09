@@ -9,6 +9,8 @@ TagManager:
   - Wall
   - Coin
   - WallTrigger
+  - DoubleScore
+  - SpeedBoost
   layers:
   - Default
   - TransparentFX

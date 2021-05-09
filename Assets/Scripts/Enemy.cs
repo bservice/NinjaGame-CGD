@@ -178,7 +178,7 @@ public class Enemy : MonoBehaviour
             player.enemyPosition = rigidBody.transform.position;
             player.lockTime = 0;
 
-            sceneController.GetComponent<SceneManagement>().score += 100;
+            sceneController.GetComponent<SceneManagement>().AddScore(100);
 
             Vector3 spawnPos = new Vector3(transform.position.x, transform.position.y + 1);
             if (player.FacingRight)
