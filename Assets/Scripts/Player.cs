@@ -109,6 +109,9 @@ public class Player : MonoBehaviour
         Attack();
         Death();
 
+        if (rigidBody.transform.position.y < -80)
+            health = 0;
+
         Camera.main.transform.position = new Vector3(rigidBody.transform.position.x, rigidBody.transform.position.y, -10.0f);
 
         anim.AnimUpdate(rigidBody.velocity.x, rigidBody.velocity.y, Grounded(), attacking);
