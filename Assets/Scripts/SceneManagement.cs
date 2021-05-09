@@ -194,7 +194,7 @@ public class SceneManagement : MonoBehaviour
             case GameState.Tutorial:
             case GameState.GameScene:
                 // pause when the player presses the ESCAPE key
-                if (Input.GetKeyUp(KeyCode.Escape))
+                if (Input.GetKeyUp(KeyCode.Escape) && currentState == GameState.GameScene)
                 {
                     TogglePause();
                 }
