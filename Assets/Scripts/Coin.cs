@@ -23,8 +23,7 @@ public class Coin : MonoBehaviour
         // increase the score when the player touches a coin and destroy the coin
         if (collision.tag == "Player")
         {
-            sceneController.GetComponent<SceneManagement>().score += 50;
-            Destroy(this);
+            sceneController.GetComponent<SceneManagement>().AddScore(50);
             Destroy(gameObject);
         }
     }

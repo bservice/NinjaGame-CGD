@@ -10,6 +10,8 @@ public class SceneManagement : MonoBehaviour
     public enum GameState { MainMenuScene, Tutorial, GameScene, GameOverScene };
     public GameState currentState;
     public bool paused = false;
+    private GameObject mainMenuUI;
+    private GameObject levelSelectUI;
     private GameObject pauseUI;
     private GameObject gameUI;
     private GameObject[] dashUI;
@@ -19,6 +21,8 @@ public class SceneManagement : MonoBehaviour
     public GameObject activated_h;
     public GameObject deactivated_h;
     private Player player;
+    private Text gameScoreText;
+    private Text gameTimerText;
     private Text scoreText;
     private Text highScoreText;
     private Text timerText;
@@ -28,11 +32,18 @@ public class SceneManagement : MonoBehaviour
     private int playerHealth;
     public float timePassed;
     public int score;
+    public int scoreModifier;
     public int currentLevel;
     public int completionStatus; // 0 if player lost level, 1 if player won level
     public float screenWidth;
     public float screenHeight;
     private bool sceneNameParsed = false;
+    private int totalLevels; // not including the tutorial
+
+    string scoreKey;
+    string highScoreKey;
+    string timeKey;
+    string bestTimeKey;
 
     // Start is called before the first frame update
     void Start()
@@ -54,8 +65,25 @@ public class SceneManagement : MonoBehaviour
 
         paused = false;
         score = 0;
+        scoreModifier = 1;
         timePassed = 0;
         numberOfDashes = 3;
+        totalLevels = 3;
+
+        highScoreKey = "level0HighScore";
+        bestTimeKey = "level0BestTime";
+
+        // create high score and best time keys if there are none
+        if (!PlayerPrefs.HasKey(highScoreKey))
+        {
+            for (int i = 0; i <= totalLevels; i++)
+            {
+                highScoreKey = "level" + i.ToString() + "HighScore";
+                bestTimeKey = "level" + i.ToString() + "BestTime";
+                PlayerPrefs.SetInt(highScoreKey, score);
+                PlayerPrefs.SetFloat(bestTimeKey, timePassed);
+            }
+        }
 
         player = FindObjectOfType<Player>();
 
@@ -75,32 +103,39 @@ public class SceneManagement : MonoBehaviour
         switch (currentState)
         {
             case GameState.MainMenuScene:
+                mainMenuUI = GameObject.Find("MainMenuUI");
+                levelSelectUI = GameObject.Find("LevelSelectUI");
+                levelSelectUI.SetActive(false);
+
+                // Uncomment the next 2 lines to reset your save file when the main menu scene is loaded
+                //PlayerPrefs.DeleteAll();
+                //PlayerPrefs.Save();
                 break;
             case GameState.Tutorial:
                 gameUI = GameObject.Find("GameUI");
-                scoreText = GameObject.Find("ScoreNumberText").GetComponent<Text>();
-                timerText = GameObject.Find("TimerNumberText").GetComponent<Text>();
+                gameScoreText = GameObject.Find("ScoreNumberText").GetComponent<Text>();
+                gameTimerText = GameObject.Find("TimerNumberText").GetComponent<Text>();
                 pauseUI = GameObject.Find("PauseScreenUI");
                 pauseUI.SetActive(false);
                 currentLevel = 0;
                 break;
             case GameState.GameScene:
                 gameUI = GameObject.Find("GameUI");
-                scoreText = GameObject.Find("ScoreNumberText").GetComponent<Text>();
-                timerText = GameObject.Find("TimerNumberText").GetComponent<Text>();
+                gameScoreText = GameObject.Find("ScoreNumberText").GetComponent<Text>();
+                gameTimerText = GameObject.Find("TimerNumberText").GetComponent<Text>();
                 pauseUI = GameObject.Find("PauseScreenUI");
                 pauseUI.SetActive(false);
-                currentLevel = 1;
+                currentLevel = PlayerPrefs.GetInt("currentLevel");
                 break;
             case GameState.GameOverScene:
                 currentLevel = PlayerPrefs.GetInt("currentLevel");
                 completionStatus = PlayerPrefs.GetInt("completionStatus");
 
-                string scoreKey = "level" + currentLevel.ToString() + "Score";
-                string highScoreKey = "level" + currentLevel.ToString() + "HighScore";
-                string timeKey = "level" + currentLevel.ToString() + "Time";
-                string bestTimeKey = "level" + currentLevel.ToString() + "BestTime";
-                
+                scoreKey = "level" + currentLevel.ToString() + "Score";
+                highScoreKey = "level" + currentLevel.ToString() + "HighScore";
+                timeKey = "level" + currentLevel.ToString() + "Time";
+                bestTimeKey = "level" + currentLevel.ToString() + "BestTime";
+
                 score = PlayerPrefs.GetInt(scoreKey);
                 timePassed = PlayerPrefs.GetFloat(timeKey);
 
@@ -122,9 +157,26 @@ public class SceneManagement : MonoBehaviour
                 }
 
                 scoreText.text = "Score: " + score.ToString();
-                highScoreText.text = "High Score: " + PlayerPrefs.GetInt(highScoreKey).ToString();
+
+                if (PlayerPrefs.GetInt(highScoreKey) > 0)
+                {
+                    highScoreText.text = "High Score: " + PlayerPrefs.GetInt(highScoreKey).ToString();
+                }
+                else
+                {
+                    highScoreText.text = "No High Score Yet";
+                }
+                
                 timerText.text = "Time: " + TimeToString(timePassed);
-                bestTimeText.text = "Best Time: " + TimeToString(PlayerPrefs.GetFloat(bestTimeKey));
+
+                if (PlayerPrefs.GetFloat(bestTimeKey) > 0)
+                {
+                    bestTimeText.text = "Best Time: " + TimeToString(PlayerPrefs.GetFloat(bestTimeKey));
+                }
+                else
+                {
+                    bestTimeText.text = "No Best Time Yet";
+                }
                 break;
         }
     }
@@ -148,13 +200,13 @@ public class SceneManagement : MonoBehaviour
                 }
 
                 // update the score UI
-                scoreText.text = score.ToString();
+                gameScoreText.text = score.ToString();
 
                 // track the time it takes for the player to complete the level
                 if (!paused)
                 {
                     timePassed += Time.deltaTime;
-                    timerText.text = TimeToString(timePassed);
+                    gameTimerText.text = TimeToString(timePassed);
                 }
 
                 break;
@@ -229,44 +281,10 @@ public class SceneManagement : MonoBehaviour
     // Changes the scene to any given scene using GameStates
     public void ChangeScene(GameState nextState)
     {
-        // save game before switching scenes
-        string scoreKey = "level" + currentLevel.ToString() + "Score";
-        string highScoreKey = "level" + currentLevel.ToString() + "HighScore";
-        string timeKey = "level" + currentLevel.ToString() + "Time";
-        string bestTimeKey = "level" + currentLevel.ToString() + "BestTime";
-        
-        PlayerPrefs.SetInt("currentLevel", currentLevel);
-        PlayerPrefs.SetInt("completionStatus", completionStatus);
-        PlayerPrefs.SetInt(scoreKey, score);
-        PlayerPrefs.SetFloat(timeKey, timePassed);
-
-        // if there is no high score or the new score is greater than the old high score, save the high score
-        if (PlayerPrefs.HasKey(highScoreKey))
+        if (currentState == GameState.Tutorial || currentState == GameState.GameScene)
         {
-            if (score > PlayerPrefs.GetInt(highScoreKey) && completionStatus == 1)
-            {
-                PlayerPrefs.SetInt(highScoreKey, score);
-            }
+            SaveGame();
         }
-        else
-        {
-            PlayerPrefs.SetInt(highScoreKey, score);
-        }
-
-        // if there is no best time or the new time is less than the old best time, save the best time
-        if (PlayerPrefs.HasKey(bestTimeKey))
-        {
-            if ((timePassed < PlayerPrefs.GetFloat(bestTimeKey) || PlayerPrefs.GetFloat(bestTimeKey) <= 0) && completionStatus == 1)
-            {
-                PlayerPrefs.SetFloat(bestTimeKey, timePassed);
-            }
-        }
-        else
-        {
-            PlayerPrefs.SetFloat(bestTimeKey, timePassed);
-        }
-
-        PlayerPrefs.Save();
 
         // switch scenes
         switch (nextState)
@@ -278,7 +296,14 @@ public class SceneManagement : MonoBehaviour
                 SceneManager.LoadScene("Tutorial");
                 break;
             case GameState.GameScene:
-                SceneManager.LoadScene("GameScene");
+                if (currentLevel == 1 || currentLevel > totalLevels)
+                {
+                    SceneManager.LoadScene("GameScene");
+                }
+                else
+                {
+                    SceneManager.LoadScene("Level" + (currentLevel - 1).ToString());
+                }
                 break;
             case GameState.GameOverScene:
                 SceneManager.LoadScene("GameOverScene");
@@ -306,13 +331,15 @@ public class SceneManagement : MonoBehaviour
     {
         currentLevel++;
 
-        // REMOVE OR CHANGE WHEN MORE LEVELS ARE ADDED
         if (currentLevel > 1)
         {
-            currentLevel = 1;
+            currentState = (GameState)(2);
+        }
+        else
+        {
+            currentState = (GameState)(currentLevel + 1);
         }
 
-        currentState = (GameState)(currentLevel + 1);
         ChangeScene(currentState);
     }
 
@@ -327,6 +354,34 @@ public class SceneManagement : MonoBehaviour
     public void QuitGame()
     {
         Application.Quit();
+    }
+
+    // Saves the game
+    public void SaveGame()
+    {
+        scoreKey = "level" + currentLevel.ToString() + "Score";
+        highScoreKey = "level" + currentLevel.ToString() + "HighScore";
+        timeKey = "level" + currentLevel.ToString() + "Time";
+        bestTimeKey = "level" + currentLevel.ToString() + "BestTime";
+
+        PlayerPrefs.SetInt("currentLevel", currentLevel);
+        PlayerPrefs.SetInt("completionStatus", completionStatus);
+        PlayerPrefs.SetInt(scoreKey, score);
+        PlayerPrefs.SetFloat(timeKey, timePassed);
+
+        // if the new score is greater than the old high score, save the high score
+        if (score > PlayerPrefs.GetInt(highScoreKey) && completionStatus == 1)
+        {
+            PlayerPrefs.SetInt(highScoreKey, score);
+        }
+
+        // if the new time is less than the old best time, save the best time
+        if ((timePassed < PlayerPrefs.GetFloat(bestTimeKey) || PlayerPrefs.GetFloat(bestTimeKey) <= 0) && completionStatus == 1)
+        {
+            PlayerPrefs.SetFloat(bestTimeKey, timePassed);
+        }
+
+        PlayerPrefs.Save();
     }
 
     // Formats floats that represent time into a readable string
@@ -344,5 +399,26 @@ public class SceneManagement : MonoBehaviour
         }
 
         return timeString;
+    }
+
+    // Modify the current score
+    public void AddScore(int scoreChange)
+    {
+        score += scoreChange * scoreModifier;
+    }
+
+    // Toggles between the main menu and level select screen
+    public void ToggleLevelSelect()
+    {
+        mainMenuUI.SetActive(!mainMenuUI.activeSelf);
+        levelSelectUI.SetActive(!levelSelectUI.activeSelf);
+    }
+
+    // Selects a given level
+    public void SelectLevel(int levelSelected)
+    {
+        currentLevel = levelSelected;
+        currentState = GameState.GameScene;
+        ChangeScene(currentState);
     }
 }
